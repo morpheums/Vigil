@@ -12,9 +12,9 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Status Summary
 - Total tasks: 12
-- DONE: 10 | READY: 2 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 0
-- Current iteration: 9/40
-- Active task: Wave 5 (TASK-011, TASK-012)
+- DONE: 12 | READY: 0 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 0
+- Current iteration: 10/40
+- Active task: NONE — ALL TASKS COMPLETE
 
 ## Wave Groups
 
@@ -103,13 +103,13 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-010.md
 
 ### TASK-011: ContagionGraph integration + Wallet Detail modal
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 5
 - **Depends on**: TASK-008
 - **Manifest**: hydra/tasks/TASK-011.md
 
 ### TASK-012: Push notifications + error/loading states
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 5
 - **Depends on**: TASK-008, TASK-009, TASK-010
 - **Manifest**: hydra/tasks/TASK-012.md
@@ -125,12 +125,14 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - [x] TASK-008: WalletCard, RiskBadge + Wallets tab -> DONE
 - [x] TASK-009: AlertItem, ActNowCard + Alerts tab -> DONE
 - [x] TASK-010: SafeSend tab with risk check form -> DONE
+- [x] TASK-011: ContagionGraph integration + Wallet Detail modal -> DONE
+- [x] TASK-012: Push notifications + error/loading states -> DONE
 
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** Wave 5 (TASK-011, TASK-012)
-- **Last Action:** Wave 4 reviewed and merged — all mobile screens complete
-- **Next Action:** Launch Wave 5 parallel implementation (TASK-011, TASK-012)
-- **Last Checkpoint:** Wave 4 DONE, Wave 5 promoted to READY
-- **Last Commit:** pending Wave 4 merge commit
+- **Current Task:** NONE — ALL 12 TASKS COMPLETE
+- **Last Action:** Wave 5 reviewed and merged — all integration features done
+- **Next Action:** Post-loop agents (documentation, release)
+- **Last Checkpoint:** All tasks DONE
+- **Last Commit:** pending Wave 5 merge

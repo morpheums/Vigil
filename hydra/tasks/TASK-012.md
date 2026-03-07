@@ -1,7 +1,7 @@
 # TASK-012: Push notifications registration + error/loading states
 
 - **ID**: TASK-012
-- **Status**: PLANNED
+- **Status**: DONE
 - **Group**: 5
 - **Wave**: 5
 - **Depends on**: TASK-008, TASK-009, TASK-010

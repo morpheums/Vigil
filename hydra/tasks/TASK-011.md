@@ -1,7 +1,7 @@
 # TASK-011: ContagionGraph integration + Wallet Detail modal
 
 - **ID**: TASK-011
-- **Status**: PLANNED
+- **Status**: DONE
 - **Group**: 5
 - **Wave**: 5
 - **Depends on**: TASK-008
