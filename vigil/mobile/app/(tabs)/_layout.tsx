@@ -9,10 +9,7 @@ function HeaderTitle() {
   return (
     <View style={styles.headerTitle}>
       <VigilLogo size={28} />
-      <View>
-        <Text style={styles.headerText}>VIGIL</Text>
-        <Text style={styles.headerSub}>BY RANGE</Text>
-      </View>
+      <Text style={styles.headerText}>VIGIL</Text>
     </View>
   );
 }
@@ -51,7 +48,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="alerts"
         options={{
-          title: 'Alerts',
+          headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{ ios: 'bell.fill', android: 'notifications', web: 'notifications' }}
@@ -59,12 +56,13 @@ export default function TabLayout() {
               size={24}
             />
           ),
+          tabBarLabel: 'Alerts',
         }}
       />
       <Tabs.Screen
         name="safesend"
         options={{
-          title: 'SafeSend',
+          headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{ ios: 'paperplane.fill', android: 'send', web: 'send' }}
@@ -72,6 +70,7 @@ export default function TabLayout() {
               size={24}
             />
           ),
+          tabBarLabel: 'SafeSend',
         }}
       />
     </Tabs>
@@ -89,12 +88,5 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.syneExtraBold,
     fontSize: 18,
     letterSpacing: 2,
-  },
-  headerSub: {
-    fontFamily: Fonts.spaceMono,
-    fontSize: 7,
-    color: Colors.accent,
-    letterSpacing: 2.5,
-    marginTop: -2,
   },
 });

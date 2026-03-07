@@ -160,6 +160,7 @@ function RootLayoutNav() {
             }}
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="wallet-detail" options={{ title: '', headerBackTitle: 'Back' }} />
           </Stack>
         </ThemeProvider>
       </BottomSheetModalProvider>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { NETWORKS, Network } from '../constants/networks';
 import { Colors, Fonts } from '../constants/theme';
+import NetworkLogo from './NetworkLogo';
 
 interface NetworkChipsProps {
   networks?: Network[];
@@ -27,14 +28,14 @@ export default function NetworkChips({
               style={[
                 styles.gridCell,
                 isSelected && {
-                  borderColor: n.color + '80',
-                  backgroundColor: n.color + '1A',
+                  borderColor: n.color + 'AA',
+                  backgroundColor: n.color + '30',
                 },
               ]}
               onPress={() => onSelect(n.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.dot, { backgroundColor: n.color }]} />
+              <NetworkLogo networkId={n.id} size={24} />
               <Text style={[styles.gridSymbol, { color: n.color }]}>{n.symbol}</Text>
               <Text style={styles.gridName}>{n.name}</Text>
             </TouchableOpacity>
@@ -62,10 +63,11 @@ export default function NetworkChips({
               onPress={() => onSelect(n.id)}
               activeOpacity={0.7}
             >
+              <NetworkLogo networkId={n.id} size={16} />
               <Text
                 style={[
                   styles.chipText,
-                  { color: isSelected ? n.color : Colors.t3 },
+                  { color: isSelected ? n.color : Colors.t1 },
                 ]}
               >
                 {n.symbol}
@@ -79,7 +81,7 @@ export default function NetworkChips({
 }
 
 const styles = StyleSheet.create({
-  // Grid mode (Add Wallet bottom sheet — screen-06)
+  // Grid mode (Add Wallet bottom sheet)
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -97,23 +99,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     backgroundColor: Colors.s2,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
   gridSymbol: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 9,
+    fontSize: 11,
     letterSpacing: 0.5,
   },
   gridName: {
-    fontFamily: Fonts.interRegular,
-    fontSize: 9,
-    color: Colors.t3,
+    fontFamily: Fonts.interMedium,
+    fontSize: 11,
+    color: Colors.t1,
   },
-  // Row mode (SafeSend — screen-05)
+  // Row mode (SafeSend)
   rowScroll: {
     flexGrow: 0,
   },
@@ -122,6 +119,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 6,

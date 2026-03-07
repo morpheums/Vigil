@@ -218,7 +218,7 @@ export default function SafeSendScreen() {
       >
         {/* Intro */}
         <View style={styles.intro}>
-          <Text style={styles.introTitle}>Risk Check</Text>
+          <Text style={styles.introTitle}>SafeSend</Text>
           <Text style={styles.introSub}>
             Verify any address before sending funds
           </Text>
@@ -234,7 +234,7 @@ export default function SafeSendScreen() {
               value={recipientAddress}
               onChangeText={onRecipientChange}
               placeholder="0x... or wallet address"
-              placeholderTextColor={Colors.t3}
+              placeholderTextColor={Colors.t2}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -244,7 +244,7 @@ export default function SafeSendScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>NETWORK</Text>
             <NetworkChips
-              layout="row"
+              layout="grid"
               selected={network}
               onSelect={onNetworkChange}
             />
@@ -259,7 +259,7 @@ export default function SafeSendScreen() {
                 value={amountUsd}
                 onChangeText={onAmountChange}
                 placeholder="e.g. 2,500"
-                placeholderTextColor={Colors.t3}
+                placeholderTextColor={Colors.t2}
                 keyboardType="numeric"
               />
             </View>
@@ -270,7 +270,7 @@ export default function SafeSendScreen() {
                 value={senderAddress}
                 onChangeText={onSenderChange}
                 placeholder="0x742d...4e"
-                placeholderTextColor={Colors.t3}
+                placeholderTextColor={Colors.t2}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -436,8 +436,8 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t2,
+    fontSize: 12,
+    color: Colors.t1,
     letterSpacing: 2,
     marginBottom: 6,
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: Colors.t1,
     fontFamily: Fonts.spaceMono,
-    fontSize: 10,
+    fontSize: 13,
   },
   fieldRow: {
     flexDirection: 'row',
@@ -461,18 +461,16 @@ const styles = StyleSheet.create({
   // Check button
   checkBtn: {
     width: '100%',
-    backgroundColor: Colors.s2,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingVertical: 13,
+    backgroundColor: Colors.accent,
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 4,
   },
   checkBtnText: {
     fontFamily: Fonts.syneExtraBold,
-    fontSize: 14,
-    color: Colors.t2,
+    fontSize: 15,
+    color: '#000',
   },
 
   // Error

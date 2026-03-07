@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   walletName: {
     fontFamily: Fonts.syneBold,
-    fontSize: 13,
+    fontSize: 16,
     color: Colors.t1,
   },
   topRight: {
@@ -215,11 +215,11 @@ const styles = StyleSheet.create({
   balance: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 15,
+    fontSize: 18,
     color: Colors.t1,
   },
   activity: {
-    fontSize: 10,
+    fontSize: 12,
     color: Colors.t2,
     marginTop: 2,
   },
@@ -238,15 +238,15 @@ const styles = StyleSheet.create({
   networkText: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 8,
+    fontSize: 10,
     letterSpacing: 0.6,
   },
 
   // Row 3 — address
   address: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t1,
     marginBottom: 10,
   },
 
@@ -268,12 +268,12 @@ const styles = StyleSheet.create({
   cpillScore: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 14,
   },
   cpillLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 8,
-    color: Colors.t2,
+    fontSize: 10,
+    color: Colors.t1,
     letterSpacing: 0.5,
     flex: 1,
   },

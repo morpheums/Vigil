@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Vigil — Network Picker with Real Logos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#080808; --s1:#111111; --s2:#181818; --border:#242424; --border2:#2e2e2e;
+    --accent:#3DFFA0; --t1:#FFFFFF; --t2:#888888; --t3:#444444;
+    --eth:#627EEA; --sol:#9945FF; --trx:#FF3B30; --atom:#2E3148; --osmo:#750BBB; --xlm:#0099CC;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#050505; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:40px 20px; font-family:'Inter',sans-serif; }
+  .label { font-family:'Space Mono',monospace; font-size:10px; color:#2a2a2a; letter-spacing:0.2em; margin-bottom:20px; }
+
+  /* phone shell */
+  .phone { width:390px; background:#0e0e0e; border:1px solid #2a2a2a; border-radius:44px; overflow:hidden; box-shadow:0 0 0 1px #333 inset,0 40px 100px rgba(0,0,0,0.8); display:flex; flex-direction:column; }
+  .notch { height:34px; display:flex; align-items:center; justify-content:center; padding-top:8px; }
+  .notch-bar { width:120px; height:5px; background:#1e1e1e; border-radius:10px; }
+  .screen { background:var(--bg); padding:20px; }
+
+  /* section label */
+  .section-label { font-family:'Space Mono',monospace; font-size:9px; color:var(--t3); letter-spacing:0.2em; margin-bottom:12px; }
+
+  /* grid */
+  .net-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+
+  .net-btn {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:7px; padding:16px 8px 14px;
+    border-radius:14px; border:1px solid var(--border2);
+    background:var(--s2); cursor:pointer;
+    transition:all 0.18s; position:relative; overflow:hidden;
+  }
+  .net-btn:hover { border-color:#333; background:#1f1f1f; }
+
+  /* selected state — ETH example */
+  .net-btn.sel-eth {
+    border-color:rgba(98,126,234,0.55);
+    background:rgba(98,126,234,0.10);
+    box-shadow:0 0 0 1px rgba(98,126,234,0.2) inset;
+  }
+  .net-btn.sel-eth::after {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,rgba(98,126,234,0.8),transparent);
+  }
+
+  .net-logo { width:32px; height:32px; border-radius:50%; object-fit:contain; }
+
+  /* fallback colored circle if image fails */
+  .net-logo-fallback {
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-family:'Space Mono',monospace; font-weight:700;
+  }
+
+  .net-symbol {
+    font-family:'Space Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:0.06em;
+  }
+  .net-name {
+    font-family:'Inter',sans-serif; font-size:10px; color:var(--t2);
+    letter-spacing:0.02em;
+  }
+
+  /* check mark on selected */
+  .net-check {
+    position:absolute; top:8px; right:8px;
+    width:16px; height:16px; border-radius:50%;
+    background:rgba(98,126,234,1);
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:#fff;
+  }
+
+  .home-bar { height:28px; display:flex; align-items:center; justify-content:center; }
+  .home-line { width:120px; height:4px; background:#1a1a1a; border-radius:10px; }
+</style>
+</head>
+<body>
+<div class="label">VIGIL BY RANGE · NETWORK PICKER — REAL LOGOS</div>
+<div class="phone">
+  <div class="notch"><div class="notch-bar"></div></div>
+  <div class="screen">
+    <div class="section-label">NETWORK</div>
+    <div class="net-grid">
+
+      <!-- ETH — selected -->
+      <div class="net-btn sel-eth">
+        <div class="net-check">✓</div>
+        <img class="net-logo"
+          src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg"
+          alt="ETH"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(98,126,234,0.2);color:#627EEA;">Ξ</div>
+        <div class="net-symbol" style="color:#627EEA;">ETH</div>
+        <div class="net-name">Ethereum</div>
+      </div>
+
+      <!-- SOL -->
+      <div class="net-btn">
+        <img class="net-logo"
+          src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg"
+          alt="SOL"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(153,69,255,0.2);color:#9945FF;">◎</div>
+        <div class="net-symbol" style="color:#9945FF;">SOL</div>
+        <div class="net-name">Solana</div>
+      </div>
+
+      <!-- TRX -->
+      <div class="net-btn">
+        <img class="net-logo"
+          src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/trx.svg"
+          alt="TRX"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(255,59,48,0.2);color:#FF3B30;">T</div>
+        <div class="net-symbol" style="color:#FF3B30;">TRX</div>
+        <div class="net-name">Tron</div>
+      </div>
+
+      <!-- ATOM -->
+      <div class="net-btn">
+        <img class="net-logo"
+          src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/atom.svg"
+          alt="ATOM"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(107,117,202,0.2);color:#6B75CA;">⚛</div>
+        <div class="net-symbol" style="color:#6B75CA;">ATOM</div>
+        <div class="net-name">Cosmos</div>
+      </div>
+
+      <!-- OSMO — not in cryptocurrency-icons, use chain registry -->
+      <div class="net-btn">
+        <img class="net-logo"
+          src="https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.svg"
+          alt="OSMO"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(117,11,187,0.2);color:#750BBB;">O</div>
+        <div class="net-symbol" style="color:#750BBB;">OSMO</div>
+        <div class="net-name">Osmosis</div>
+      </div>
+
+      <!-- XLM -->
+      <div class="net-btn">
+        <img class="net-logo"
+          src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xlm.svg"
+          alt="XLM"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="net-logo-fallback" style="display:none;background:rgba(0,153,204,0.2);color:#0099CC;">✦</div>
+        <div class="net-symbol" style="color:#0099CC;">XLM</div>
+        <div class="net-name">Stellar</div>
+      </div>
+
+    </div>
+  </div>
+  <div class="home-bar"><div class="home-line"></div></div>
+</div>
+
+<div style="margin-top:28px;max-width:390px;width:100%;">
+  <div style="font-family:'Space Mono',monospace;font-size:9px;color:#2a2a2a;letter-spacing:0.2em;margin-bottom:12px;">LOGO CDN REFERENCE</div>
+  <div style="font-family:'Space Mono',monospace;font-size:10px;color:#444;line-height:2.2;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:14px 16px;">
+    <span style="color:#3DFFA0">ETH</span>  cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg<br/>
+    <span style="color:#9945FF">SOL</span>  cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg<br/>
+    <span style="color:#FF3B30">TRX</span>  cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/trx.svg<br/>
+    <span style="color:#6B75CA">ATOM</span> cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/atom.svg<br/>
+    <span style="color:#750BBB">OSMO</span> raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.svg<br/>
+    <span style="color:#0099CC">XLM</span>  cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xlm.svg
+  </div>
+</div>
+</body>
+</html>

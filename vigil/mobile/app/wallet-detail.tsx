@@ -156,12 +156,6 @@ export default function WalletDetailScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Back row */}
-        <View style={styles.backRow}>
-          <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-            <Text style={styles.backText}>{'\u2190'} Back</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* Detail header */}
         <View style={styles.detailHeader}>
@@ -348,13 +342,13 @@ const styles = StyleSheet.create({
   networkBadgeText: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 8,
+    fontSize: 10,
     letterSpacing: 0.5,
   },
   detailAddr: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t2,
     marginBottom: 8,
   },
 
@@ -380,8 +374,8 @@ const styles = StyleSheet.create({
   },
   statKey: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 8,
-    color: Colors.t3,
+    fontSize: 10,
+    color: Colors.t2,
     letterSpacing: 0.8,
   },
 
@@ -400,8 +394,8 @@ const styles = StyleSheet.create({
   },
   cScoreLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t2,
     letterSpacing: 1.8,
     marginBottom: 4,
   },
@@ -422,7 +416,7 @@ const styles = StyleSheet.create({
   },
   cSub: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
+    fontSize: 11,
     color: Colors.t2,
     marginTop: 3,
   },
@@ -438,7 +432,7 @@ const styles = StyleSheet.create({
   },
   refreshBtnText: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
+    fontSize: 11,
     color: Colors.accent,
     letterSpacing: 0.6,
   },
@@ -467,8 +461,8 @@ const styles = StyleSheet.create({
   },
   txSectionLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t2,
     letterSpacing: 1.8,
   },
   txPlaceholder: {

@@ -125,7 +125,7 @@ Redesign all 6 Vigil mobile screens to match HTML mockup designs in docs/design/
 
 ## Recovery Pointer
 - **Current Task:** none
-- **Last Action:** Iteration 4 completed
+- **Last Action:** Iteration 28 completed
 - **Next Action:** Continue work on next READY task
-- **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** 800892f Adding test addesses, official icon and mockup designs
+- **Last Checkpoint:** hydra/checkpoints/iteration-028.json
+- **Last Commit:** 23b96ef New screens design implementation

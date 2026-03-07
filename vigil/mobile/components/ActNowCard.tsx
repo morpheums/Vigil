@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   actionsTitle: {
     fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: Colors.t3,
+    color: Colors.t2,
     letterSpacing: 1.8,
     marginBottom: 10,
   },

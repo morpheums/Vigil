@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   actMore: {
     fontFamily: Fonts.spaceMono,
     fontSize: 8,
-    color: Colors.t3,
+    color: Colors.t2,
     textAlign: 'center',
     paddingTop: 2,
   },

@@ -284,8 +284,8 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t2,
     letterSpacing: 3,
   },
   emptyState: {

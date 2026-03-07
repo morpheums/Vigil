@@ -178,7 +178,7 @@ export default function WalletsScreen() {
             <TextInput
               style={styles.fieldInput}
               placeholder="0x742d35Cc6634C0532925a3b..."
-              placeholderTextColor={Colors.t3}
+              placeholderTextColor={Colors.t2}
               value={address}
               onChangeText={setAddress}
               autoCapitalize="none"
@@ -195,34 +195,34 @@ export default function WalletsScreen() {
             <NetworkChips layout="grid" selected={network} onSelect={setNetwork} />
           </View>
 
-          {/* Label + Email side by side */}
-          <View style={styles.fieldRow}>
-            <View style={styles.fieldRowItem}>
-              <Text style={styles.fieldLabel}>
-                LABEL <Text style={styles.optTag}>OPTIONAL</Text>
-              </Text>
-              <TextInput
-                style={styles.fieldInput}
-                placeholder="e.g. Main Wallet"
-                placeholderTextColor={Colors.t3}
-                value={label}
-                onChangeText={setLabel}
-              />
-            </View>
-            <View style={styles.fieldRowItem}>
-              <Text style={styles.fieldLabel}>
-                ALERT EMAIL <Text style={styles.optTag}>OPTIONAL</Text>
-              </Text>
-              <TextInput
-                style={styles.fieldInput}
-                placeholder="you@email.com"
-                placeholderTextColor={Colors.t3}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
+          {/* Label */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>
+              LABEL <Text style={styles.optTag}>OPTIONAL</Text>
+            </Text>
+            <TextInput
+              style={styles.fieldInput}
+              placeholder="e.g. Main Wallet"
+              placeholderTextColor={Colors.t2}
+              value={label}
+              onChangeText={setLabel}
+            />
+          </View>
+
+          {/* Alert Email */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>
+              ALERT EMAIL <Text style={styles.optTag}>OPTIONAL</Text>
+            </Text>
+            <TextInput
+              style={styles.fieldInput}
+              placeholder="you@email.com"
+              placeholderTextColor={Colors.t2}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
           </View>
 
           {/* Submit */}
@@ -236,7 +236,7 @@ export default function WalletsScreen() {
               <ActivityIndicator color="#080808" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {'\uD83D\uDEE1\uFE0F'} Watch Wallet
+                Watch Wallet
               </Text>
             )}
           </TouchableOpacity>
@@ -299,13 +299,13 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t3,
+    fontSize: 11,
+    color: Colors.t2,
     letterSpacing: 3,
   },
   sectionCount: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
+    fontSize: 11,
     color: Colors.t2,
     backgroundColor: Colors.s2,
     borderWidth: 1,
@@ -382,8 +382,8 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontFamily: Fonts.spaceMono,
-    fontSize: 9,
-    color: Colors.t2,
+    fontSize: 12,
+    color: Colors.t1,
     letterSpacing: 1.4,
     marginBottom: 7,
   },
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   helperText: {
     fontFamily: Fonts.interRegular,
     fontSize: 10,
-    color: Colors.t3,
+    color: Colors.t1,
     marginTop: 5,
     lineHeight: 15,
     paddingHorizontal: 2,
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   optTag: {
     fontFamily: Fonts.spaceMono,
     fontSize: 8,
-    color: Colors.t3,
+    color: Colors.t1,
     letterSpacing: 0.5,
   },
   fieldRow: {

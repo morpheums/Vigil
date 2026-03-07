@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 8,
+    fontSize: 10,
     letterSpacing: 0.5,
   },
 });
