@@ -79,7 +79,7 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-006.md
 
 ### TASK-007: Express server with all REST routes
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 3
 - **Depends on**: TASK-001, TASK-002, TASK-004, TASK-005, TASK-006
 - **Manifest**: hydra/tasks/TASK-007.md
@@ -119,8 +119,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** TASK-005
-- **Last Action:** TASK-005 IMPLEMENTED — alerts.js + 19 passing tests
-- **Next Action:** Review TASK-005
-- **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** pending hydra: TASK-005 commit
+- **Current Task:** TASK-007
+- **Last Action:** TASK-007 IMPLEMENTED -- index.js + 16 passing tests
+- **Next Action:** Review TASK-007
+- **Last Checkpoint:** TASK-007 implemented
+- **Last Commit:** pending hydra: TASK-007 commit
