@@ -61,19 +61,19 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-003.md
 
 ### TASK-004: Contagion score engine
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-004.md
 
 ### TASK-005: Alerts module with Act Now actions
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-005.md
 
 ### TASK-006: Polling loop
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-006.md
@@ -119,8 +119,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** TASK-003
-- **Last Action:** TASK-003 IMPLEMENTED — Expo scaffold, 3 tabs, pre-built hooks/components, networks.ts, tsc clean
-- **Next Action:** Review TASK-003
+- **Current Task:** TASK-006
+- **Last Action:** TASK-006 IMPLEMENTED — poller.js + 9 passing tests
+- **Next Action:** Review TASK-006
 - **Last Checkpoint:** hydra/checkpoints/iteration-004.json
 - **Last Commit:** pending

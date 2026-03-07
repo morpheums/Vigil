@@ -1,7 +1,9 @@
 # TASK-006: Polling loop
 
 - **ID**: TASK-006
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
+- **Base SHA**: 229862b8fa6c89fcb216888c6ecf8c380e1b5d61
+- **Claimed at**: 2026-03-07
 - **Group**: 2
 - **Wave**: 2
 - **Depends on**: TASK-001, TASK-002
