@@ -1,7 +1,7 @@
 # TASK-004: Contagion score engine
 
 - **ID**: TASK-004
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Wave**: 2
 - **Depends on**: TASK-001, TASK-002

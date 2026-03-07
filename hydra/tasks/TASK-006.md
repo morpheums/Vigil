@@ -1,7 +1,7 @@
 # TASK-006: Polling loop
 
 - **ID**: TASK-006
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Wave**: 2
 - **Depends on**: TASK-001, TASK-002

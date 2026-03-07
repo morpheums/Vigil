@@ -1,7 +1,7 @@
 # TASK-005: Alerts module with Act Now actions
 
 - **ID**: TASK-005
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Wave**: 2
 - **Depends on**: TASK-001, TASK-002

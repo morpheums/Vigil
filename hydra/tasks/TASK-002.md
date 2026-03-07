@@ -1,7 +1,7 @@
 # TASK-002: Range MCP API helper module
 
 - **ID**: TASK-002
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Claimed at**: 2026-03-07
 - **Base SHA**: 8f3236b87e12b46dc1ef9600898d8dc0e9811649
 - **Group**: 1

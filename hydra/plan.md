@@ -12,9 +12,9 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Status Summary
 - Total tasks: 12
-- DONE: 0 | READY: 0 | IN_PROGRESS: 0 | IN_REVIEW: 3 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 9
+- DONE: 3 | READY: 3 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 6
 - Current iteration: 1/40
-- Active task: TASK-001 (review pending)
+- Active task: Wave 2 starting (TASK-004, TASK-005, TASK-006)
 
 ## Wave Groups
 
@@ -43,78 +43,81 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Tasks
 
 ### TASK-001: Backend package.json, .env template, and SQLite database module
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-001.md
 
 ### TASK-002: Range MCP API helper module
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-002.md
 
 ### TASK-003: Expo mobile app scaffold with tab layout and pre-built hooks
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-003.md
 
 ### TASK-004: Contagion score engine
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-004.md
 
 ### TASK-005: Alerts module with Act Now actions
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-005.md
 
 ### TASK-006: Polling loop
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 2
 - **Depends on**: TASK-001, TASK-002
 - **Manifest**: hydra/tasks/TASK-006.md
 
 ### TASK-007: Express server with all REST routes
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 3
 - **Depends on**: TASK-001, TASK-002, TASK-004, TASK-005, TASK-006
 - **Manifest**: hydra/tasks/TASK-007.md
 
 ### TASK-008: WalletCard, RiskBadge components + Wallets tab
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-008.md
 
 ### TASK-009: AlertItem, ActNowCard components + Alerts tab
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-009.md
 
 ### TASK-010: SafeSend tab with risk check form
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-010.md
 
 ### TASK-011: ContagionGraph integration + Wallet Detail modal
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 5
 - **Depends on**: TASK-008
 - **Manifest**: hydra/tasks/TASK-011.md
 
 ### TASK-012: Push notifications + error/loading states
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 5
 - **Depends on**: TASK-008, TASK-009, TASK-010
 - **Manifest**: hydra/tasks/TASK-012.md
 
 ## Completed
+- [x] TASK-001: Backend package.json, .env template, and db.js -> DONE (sha: b8ba351)
+- [x] TASK-002: Range MCP API helper module -> DONE (sha: b8ba351)
+- [x] TASK-003: Expo mobile scaffold -> DONE (sha: b8ba351)
 
 ## Blocked
 

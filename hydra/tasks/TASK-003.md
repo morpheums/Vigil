@@ -1,7 +1,7 @@
 # TASK-003: Expo mobile app scaffold with tab layout and pre-built hooks
 
 - **ID**: TASK-003
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **claimed_at**: 2026-03-07
 - **Base SHA**: 8f3236b87e12b46dc1ef9600898d8dc0e9811649
 - **Group**: 1
