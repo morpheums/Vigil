@@ -2,17 +2,23 @@
   "schema_version": 2,
   "install_mode": "shared",
   "mode": "afk",
-  "objective": "Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQLite, Range MCP API integration, contagion score engine, Act Now alerts, and Expo React Native mobile app with Wallets, Alerts, and SafeSend tabs — as specified in VIGIL_SPEC.md",
-  "objective_set_at": "2026-03-07T12:34:37Z",
-  "project_spec": null,
+  "objective": "Redesign all 6 Vigil mobile screens to match HTML mockup designs in docs/design/screens/ -- install fonts/bottom-sheet, create theme tokens, rewrite WalletCard/AlertItem/ActNowCard/NetworkChips components, rewrite all 4 screens + wallet-detail, cleanup unused deps",
+  "objective_set_at": "2026-03-07T20:00:00Z",
+  "project_spec": "docs/plans/2026-03-07-screen-redesign.md",
   "objectives_history": [
     {
       "objective": "Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQLite, Range MCP API integration, contagion score engine, Act Now alerts, and Expo React Native mobile app with Wallets, Alerts, and SafeSend tabs — as specified in VIGIL_SPEC.md",
-      "started_at": "2026-03-07T12:34:37Z"
+      "started_at": "2026-03-07T12:34:37Z",
+      "completed_at": "2026-03-07T19:59:00Z",
+      "plan_archived_to": "hydra/archive/2026-03-07-build-vigil-app/"
+    },
+    {
+      "objective": "Redesign all 6 Vigil mobile screens to match HTML mockup designs",
+      "started_at": "2026-03-07T20:00:00Z"
     }
   ],
   "max_iterations": 40,
-  "current_iteration": 14,
+  "current_iteration": 4,
   "paused": false,
   "completion_promise": "HYDRA_COMPLETE",
   "task_file": "hydra/plan.md",
@@ -106,8 +112,8 @@
     "block_destructive_commands": true,
     "require_tests_pass_before_review": true,
     "max_consecutive_failures": 5,
-    "consecutive_failures": 4,
-    "_prev_done_count": 12
+    "consecutive_failures": 1,
+    "_prev_done_count": 0
   },
   "afk": {
     "enabled": true,
@@ -117,7 +123,7 @@
     "auto_commit": true,
     "commit_prefix": "hydra:",
     "branch_per_task": true,
-    "last_task_branch": "hydra/TASK-007"
+    "last_task_branch": null
   },
   "context": {
     "budget_strategy": "aggressive",

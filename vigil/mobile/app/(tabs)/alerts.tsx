@@ -1,15 +1,16 @@
 // app/(tabs)/alerts.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Alerts tab — shows all alerts sorted by sent_at DESC, pull-to-refresh,
-// unread count in header, Act Now modal for HIGH/CRITICAL alerts.
+// Alerts tab — SectionList grouped by date (TODAY / YESTERDAY / EARLIER),
+// pull-to-refresh, unread badge, Act Now bottom sheet for HIGH/CRITICAL.
+// Matches screen-03-alerts.html mockup.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  FlatList,
+  SectionList,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
@@ -17,6 +18,21 @@ import { useRouter } from 'expo-router';
 import { useApi, Alert, ActNowAction } from '../../hooks/useApi';
 import AlertItem from '../../components/AlertItem';
 import ActNowCard from '../../components/ActNowCard';
+import { Colors, Fonts, Spacing, Radii } from '../../constants/theme';
+
+// ── Date grouping ────────────────────────────────────────────────────────────
+
+function getDateGroup(sentAt: string): string {
+  const date = new Date(sentAt);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  if (date >= today) return 'TODAY';
+  if (date >= yesterday) return 'YESTERDAY';
+  return 'EARLIER';
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 
 export default function AlertsScreen() {
   const api = useApi();
@@ -27,7 +43,7 @@ export default function AlertsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Act Now modal state
+  // Act Now bottom sheet state
   const [actNowAlert, setActNowAlert] = useState<Alert | null>(null);
   const [actNowVisible, setActNowVisible] = useState(false);
 
@@ -66,6 +82,19 @@ export default function AlertsScreen() {
 
   const unreadCount = alerts.filter((a) => a.acknowledged === 0).length;
 
+  // ── Date-grouped sections ──────────────────────────────────────────────
+
+  const sections = useMemo(() => {
+    const groups: Record<string, Alert[]> = {};
+    const order = ['TODAY', 'YESTERDAY', 'EARLIER'];
+    alerts.forEach((a) => {
+      const group = getDateGroup(a.sent_at);
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(a);
+    });
+    return order.filter((g) => groups[g]).map((g) => ({ title: g, data: groups[g]! }));
+  }, [alerts]);
+
   // ── Handlers ───────────────────────────────────────────────────────────
 
   const handleActNow = (alert: Alert) => {
@@ -100,7 +129,7 @@ export default function AlertsScreen() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render helpers ─────────────────────────────────────────────────────
 
   const renderItem = ({ item }: { item: Alert }) => (
     <AlertItem
@@ -110,11 +139,17 @@ export default function AlertsScreen() {
     />
   );
 
+  const renderSectionHeader = ({ section }: { section: { title: string } }) => (
+    <View style={styles.sectionRow}>
+      <Text style={styles.sectionLabel}>{section.title}</Text>
+    </View>
+  );
+
   const renderEmpty = () => {
     if (loading) return null;
     return (
       <View style={styles.emptyState}>
-        <Text style={styles.emptyIcon}>{'🛡️'}</Text>
+        <Text style={styles.emptyIcon}>{'\u{1F6E1}\uFE0F'}</Text>
         <Text style={styles.emptyTitle}>No alerts yet</Text>
         <Text style={styles.emptySubtitle}>
           Your wallets are being monitored.
@@ -123,14 +158,16 @@ export default function AlertsScreen() {
     );
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────
+
   return (
     <View style={styles.container}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={styles.title}>Alerts</Text>
         {unreadCount > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadText}>{unreadCount}</Text>
+          <View style={styles.badgeNew}>
+            <Text style={styles.badgeNewText}>{unreadCount} new</Text>
           </View>
         )}
       </View>
@@ -145,31 +182,33 @@ export default function AlertsScreen() {
       {/* ── Loading state ───────────────────────────────────────────────── */}
       {loading && (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator color="#3DFFA0" size="small" />
+          <ActivityIndicator color={Colors.accent} size="small" />
         </View>
       )}
 
-      {/* ── Alert list ──────────────────────────────────────────────────── */}
+      {/* ── Alert list (date-grouped SectionList) ─────────────────────── */}
       {!loading && (
-        <FlatList
-          data={alerts}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#3DFFA0"
-              colors={['#3DFFA0']}
+              tintColor={Colors.accent}
+              colors={[Colors.accent]}
             />
           }
         />
       )}
 
-      {/* ── Act Now modal ───────────────────────────────────────────────── */}
+      {/* ── Act Now bottom sheet ──────────────────────────────────────── */}
       <ActNowCard
         alert={actNowAlert}
         visible={actNowVisible}
@@ -186,51 +225,47 @@ export default function AlertsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#080808',
+    backgroundColor: Colors.bg,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 16,
-    paddingHorizontal: 18,
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
+    borderBottomColor: Colors.border,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'SpaceMono',
-    letterSpacing: 0.3,
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 18,
+    color: Colors.t1,
+    letterSpacing: -0.02 * 18,
   },
-  unreadBadge: {
-    marginLeft: 10,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
+  badgeNew: {
+    backgroundColor: Colors.danger,
+    borderRadius: 20,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
   },
-  unreadText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    color: '#FFFFFF',
+  badgeNewText: {
+    fontFamily: Fonts.spaceMono,
     fontWeight: '700',
+    fontSize: 9,
+    color: '#FFFFFF',
   },
   errorBanner: {
     backgroundColor: 'rgba(255,59,48,0.1)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,59,48,0.2)',
     paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingHorizontal: Spacing.lg,
   },
   errorText: {
-    fontFamily: 'SpaceMono',
+    fontFamily: Fonts.spaceMono,
     fontSize: 11,
-    color: '#FF3B30',
+    color: Colors.danger,
   },
   loadingWrap: {
     flex: 1,
@@ -238,9 +273,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   listContent: {
-    padding: 18,
+    paddingTop: 10,
     paddingBottom: 40,
     flexGrow: 1,
+  },
+  sectionRow: {
+    paddingTop: Spacing.xs,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
+  },
+  sectionLabel: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t3,
+    letterSpacing: 3,
   },
   emptyState: {
     flex: 1,
@@ -253,16 +299,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    fontFamily: 'SpaceMono',
+    fontFamily: Fonts.spaceMono,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: Colors.t1,
     fontWeight: '700',
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontFamily: 'SpaceMono',
+    fontFamily: Fonts.spaceMono,
     fontSize: 12,
-    color: '#888888',
+    color: Colors.t2,
     textAlign: 'center',
     lineHeight: 18,
   },

@@ -1,27 +1,14 @@
 // components/AlertItem.tsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Single alert row for the Alerts list. Two visual modes:
-//   - Normal (LOW/MEDIUM): compact row with risk dot, message, timestamp
-//   - Act Now (HIGH/CRITICAL): red/orange banner with actions preview
-// ─────────────────────────────────────────────────────────────────────────────
+// Two visual modes: ACT NOW (HIGH/CRITICAL) and Normal (LOW/MEDIUM)
+// Matches screen-03-alerts.html mockup exactly.
 
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-} from 'react-native';
-import { Alert, ActNowAction } from '../hooks/useApi';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Alert } from '../hooks/useApi';
+import { Colors, Fonts, Radii } from '../constants/theme';
+import RiskBadge from './RiskBadge';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-// ── Props ────────────────────────────────────────────────────────────────────
+// -- Props --
 
 interface AlertItemProps {
   alert: Alert;
@@ -29,25 +16,21 @@ interface AlertItemProps {
   onAcknowledge: (alertId: number) => void;
 }
 
-// ── Risk dot colors ──────────────────────────────────────────────────────────
-
-const RISK_DOT_COLORS: Record<string, string> = {
-  LOW: '#3DFFA0',
-  MEDIUM: '#F5A623',
-  HIGH: '#FF8C00',
-  CRITICAL: '#FF3B30',
-};
-
-function getRiskDotColor(riskLevel: string): string {
-  return RISK_DOT_COLORS[riskLevel.toUpperCase()] || '#888888';
-}
+// -- Helpers --
 
 function isActNowLevel(riskLevel: string): boolean {
   const level = riskLevel.toUpperCase();
   return level === 'HIGH' || level === 'CRITICAL';
 }
 
-// ── Time formatting ──────────────────────────────────────────────────────────
+function isCritical(riskLevel: string): boolean {
+  return riskLevel.toUpperCase() === 'CRITICAL';
+}
+
+function parseDirection(message: string): 'outgoing' | 'incoming' {
+  if (message.trim().startsWith('Sent')) return 'outgoing';
+  return 'incoming';
+}
 
 function formatTimestamp(sentAt: string): string {
   const date = new Date(sentAt);
@@ -67,312 +50,326 @@ function formatTimestamp(sentAt: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
+// Network badge color map
+const NETWORK_BADGE_META: Record<string, { label: string; color: string }> = {
+  ethereum:       { label: 'ETH', color: '#627EEA' },
+  solana:         { label: 'SOL', color: '#9945FF' },
+  tron:           { label: 'TRX', color: '#FF4040' },
+  'cosmoshub-4':  { label: 'ATOM', color: '#6B75CA' },
+  'osmosis-1':    { label: 'OSMO', color: '#750BBB' },
+  stellar:        { label: 'XLM', color: '#0099CC' },
+};
+
+function getNetworkMeta(network?: string): { label: string; color: string } {
+  if (network && NETWORK_BADGE_META[network]) {
+    return NETWORK_BADGE_META[network];
+  }
+  return { label: 'ETH', color: '#627EEA' };
+}
+
+// -- Inline NetworkBadge --
+
+function NetworkBadge({ network }: { network?: string }) {
+  const meta = getNetworkMeta(network);
+  return (
+    <View style={[styles.netBadge, {
+      backgroundColor: meta.color + '1A',
+      borderColor: meta.color + '4D',
+    }]}>
+      <Text style={[styles.netBadgeText, { color: meta.color }]}>
+        {meta.label}
+      </Text>
+    </View>
+  );
+}
+
+// -- Component --
 
 export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemProps) {
-  const [expanded, setExpanded] = useState(false);
   const actNow = isActNowLevel(alert.risk_level);
-  const dotColor = getRiskDotColor(alert.risk_level);
+  const critical = isCritical(alert.risk_level);
+  const direction = parseDirection(alert.message);
   const isUnread = alert.acknowledged === 0;
 
-  const toggleExpand = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpanded(!expanded);
-  };
+  // Derive network from wallet_address heuristic or default
+  const network = (alert as any).wallet_network || undefined;
 
-  // ── Act Now mode (HIGH / CRITICAL) ──────────────────────────────────────
+  // -- ACT NOW mode (HIGH / CRITICAL) --
 
   if (actNow) {
     const previewActions = alert.act_now_actions.slice(0, 2);
-    const hasMore = alert.act_now_actions.length > 2;
-    const bannerColor = alert.risk_level.toUpperCase() === 'CRITICAL' ? '#FF3B30' : '#FF8C00';
+    const totalActions = alert.act_now_actions.length;
+    const moreCount = totalActions - 2;
+
+    const bannerBg = critical
+      ? 'rgba(255,45,85,0.15)'
+      : 'rgba(255,59,48,0.15)';
+    const bannerBorderBottom = 'rgba(255,59,48,0.2)';
+    const cardBorderColor = critical
+      ? 'rgba(255,45,85,0.4)'
+      : 'rgba(255,59,48,0.35)';
+    const bannerEmoji = critical ? '\u{1F6A8}' : '\u{26A1}'; // alarm vs lightning
+    const bannerText = critical ? 'ACT NOW \u2014 SANCTIONED' : 'ACT NOW';
+    const bannerTextColor = critical ? Colors.critical : Colors.danger;
+
+    // Icon box styles based on direction
+    const iconOutgoing = direction === 'outgoing';
+    const iconBg = critical
+      ? (iconOutgoing ? 'rgba(255,45,85,0.12)' : 'rgba(255,45,85,0.12)')
+      : (iconOutgoing ? 'rgba(255,59,48,0.12)' : 'rgba(61,255,160,0.08)');
+    const iconBorder = critical
+      ? (iconOutgoing ? 'rgba(255,45,85,0.25)' : 'rgba(255,45,85,0.25)')
+      : (iconOutgoing ? 'rgba(255,59,48,0.25)' : 'rgba(61,255,160,0.15)');
 
     return (
-      <View style={[styles.container, styles.actNowContainer, { borderColor: bannerColor + '40' }]}>
+      <TouchableOpacity
+        style={[styles.card, { borderColor: cardBorderColor }]}
+        onPress={() => onActNow(alert)}
+        activeOpacity={0.8}
+      >
         {/* Banner */}
-        <View style={[styles.actNowBanner, { backgroundColor: bannerColor + '18' }]}>
-          <Text style={[styles.actNowBannerText, { color: bannerColor }]}>
-            {'⚡ ACT NOW'}
+        <View style={[styles.actBanner, {
+          backgroundColor: bannerBg,
+          borderBottomWidth: 1,
+          borderBottomColor: bannerBorderBottom,
+        }]}>
+          <Text style={styles.bannerEmoji}>{bannerEmoji}</Text>
+          <Text style={[styles.actText, { color: bannerTextColor }]}>
+            {bannerText}
           </Text>
-          <Text style={styles.timestamp}>{formatTimestamp(alert.sent_at)}</Text>
+          <Text style={styles.actTime}>{formatTimestamp(alert.sent_at)}</Text>
         </View>
 
-        {/* Wallet label */}
-        {alert.wallet_label && (
-          <Text style={styles.walletLabel}>{alert.wallet_label}</Text>
-        )}
+        {/* Body */}
+        <View style={[styles.abody, !critical && styles.abodyBorderBottom]}>
+          <View style={[styles.aicon, { backgroundColor: iconBg, borderColor: iconBorder }]}>
+            <Text style={styles.aiconText}>{iconOutgoing ? '\u2191' : '\u2193'}</Text>
+          </View>
+          <View style={styles.ainfo}>
+            <View style={styles.atitleRow}>
+              <Text style={styles.atitle} numberOfLines={1}>{alert.message}</Text>
+              {isUnread && (
+                <View style={styles.newPill}>
+                  <Text style={styles.newPillText}>NEW</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.abadges}>
+              <NetworkBadge network={network} />
+              <RiskBadge riskLevel={alert.risk_level} />
+            </View>
+          </View>
+        </View>
 
-        {/* Message */}
-        <Text style={styles.message}>{alert.message}</Text>
-
-        {/* Action previews */}
-        {previewActions.length > 0 && (
-          <View style={styles.actionsPreview}>
-            {previewActions.map((action, i) => (
-              <View key={action.id} style={styles.actionRow}>
-                <View style={[styles.actionBullet, { backgroundColor: bannerColor }]} />
-                <Text style={styles.actionLabel} numberOfLines={1}>
-                  {action.label}
-                </Text>
+        {/* Action Preview — only for HIGH, not CRITICAL */}
+        {!critical && previewActions.length > 0 && (
+          <View style={styles.actPreview}>
+            {previewActions.map((action) => (
+              <View key={action.id} style={styles.actRow}>
+                <Text style={styles.actRowLabel} numberOfLines={1}>{action.label}</Text>
+                <Text style={styles.actRowArrow}>{'\u2192'}</Text>
               </View>
             ))}
+            {moreCount > 0 && (
+              <Text style={styles.actMore}>
+                + {moreCount} more action{moreCount > 1 ? 's' : ''} {'\u00B7'} tap to open
+              </Text>
+            )}
           </View>
         )}
-
-        {/* Buttons */}
-        <View style={styles.actNowButtons}>
-          {hasMore && (
-            <TouchableOpacity
-              style={[styles.actNowBtn, { borderColor: bannerColor + '40' }]}
-              onPress={() => onActNow(alert)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.actNowBtnText, { color: bannerColor }]}>
-                See all actions
-              </Text>
-            </TouchableOpacity>
-          )}
-          {!hasMore && (
-            <TouchableOpacity
-              style={[styles.actNowBtn, { borderColor: bannerColor + '40' }]}
-              onPress={() => onActNow(alert)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.actNowBtnText, { color: bannerColor }]}>
-                View details
-              </Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={[styles.actNowBtn, styles.handleBtn]}
-            onPress={() => onAcknowledge(alert.id)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.handleBtnText}>Mark as handled</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 
-  // ── Normal mode (LOW / MEDIUM) ──────────────────────────────────────────
+  // -- Normal mode (LOW / MEDIUM) --
 
   return (
     <TouchableOpacity
-      style={[styles.container, isUnread && styles.unreadContainer]}
-      onPress={toggleExpand}
+      style={styles.card}
+      onPress={() => {
+        if (isUnread) onAcknowledge(alert.id);
+      }}
       activeOpacity={0.7}
     >
-      {/* Header row */}
-      <View style={styles.normalRow}>
-        <View style={[styles.riskDot, { backgroundColor: dotColor }]} />
-        <Text style={styles.message} numberOfLines={expanded ? undefined : 2}>
-          {alert.message}
-        </Text>
-        <Text style={styles.timestamp}>{formatTimestamp(alert.sent_at)}</Text>
-      </View>
-
-      {/* Expanded details */}
-      {expanded && (
-        <View style={styles.expandedDetails}>
-          {alert.wallet_label && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>WALLET</Text>
-              <Text style={styles.detailValue}>{alert.wallet_label}</Text>
-            </View>
-          )}
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>TX</Text>
-            <Text style={styles.detailValue} numberOfLines={1}>
-              {alert.tx_hash.slice(0, 10)}...{alert.tx_hash.slice(-6)}
-            </Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>RISK</Text>
-            <Text style={[styles.detailValue, { color: dotColor }]}>
-              {alert.risk_level.toUpperCase()}
-            </Text>
-          </View>
-          {isUnread && (
-            <TouchableOpacity
-              style={styles.acknowledgeBtn}
-              onPress={() => onAcknowledge(alert.id)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.acknowledgeBtnText}>Dismiss</Text>
-            </TouchableOpacity>
-          )}
+      <View style={styles.abody}>
+        <View style={[styles.aicon, {
+          backgroundColor: direction === 'outgoing'
+            ? 'rgba(245,166,35,0.08)'
+            : 'rgba(61,255,160,0.08)',
+          borderColor: direction === 'outgoing'
+            ? 'rgba(245,166,35,0.15)'
+            : 'rgba(61,255,160,0.15)',
+        }]}>
+          <Text style={styles.aiconText}>{direction === 'outgoing' ? '\u2191' : '\u2193'}</Text>
         </View>
-      )}
+        <View style={styles.ainfo}>
+          <Text style={styles.atitle} numberOfLines={1}>{alert.message}</Text>
+          <View style={styles.abadges}>
+            <NetworkBadge network={network} />
+            <RiskBadge riskLevel={alert.risk_level} />
+          </View>
+        </View>
+        <Text style={styles.atime}>{formatTimestamp(alert.sent_at)}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// -- Styles --
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#111111',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#242424',
+  card: {
+    marginHorizontal: 14,
     marginBottom: 10,
+    borderRadius: Radii.card,
     overflow: 'hidden',
-  },
-  unreadContainer: {
-    borderColor: '#333333',
-  },
-  actNowContainer: {
     borderWidth: 1,
+    borderColor: Colors.border,
   },
 
-  // ── Act Now mode ────────────────────────────────────────────────────────
-  actNowBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  actNowBannerText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-  },
-  walletLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#888888',
-    letterSpacing: 0.5,
-    paddingHorizontal: 14,
-    paddingTop: 8,
-  },
-  message: {
-    fontFamily: 'SpaceMono',
-    fontSize: 12,
-    color: '#FFFFFF',
-    lineHeight: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    flex: 1,
-  },
-  actionsPreview: {
-    paddingHorizontal: 14,
-    paddingBottom: 8,
-  },
-  actionRow: {
+  // Banner (ACT NOW)
+  actBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
-  },
-  actionBullet: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginRight: 8,
-  },
-  actionLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 11,
-    color: '#cccccc',
-    flex: 1,
-  },
-  actNowButtons: {
-    flexDirection: 'row',
+    paddingVertical: 7,
     paddingHorizontal: 14,
-    paddingBottom: 12,
     gap: 8,
   },
-  actNowBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#242424',
-    alignItems: 'center',
+  bannerEmoji: {
+    fontSize: 14,
   },
-  actNowBtnText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+  actText: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 11,
+    letterSpacing: 0.5,
   },
-  handleBtn: {
-    backgroundColor: 'rgba(61,255,160,0.08)',
-    borderColor: 'rgba(61,255,160,0.2)',
-  },
-  handleBtnText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#3DFFA0',
-    letterSpacing: 0.3,
+  actTime: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 8,
+    color: Colors.t2,
+    marginLeft: 'auto',
   },
 
-  // ── Normal mode ─────────────────────────────────────────────────────────
-  normalRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  // Body
+  abody: {
+    backgroundColor: Colors.s2,
     paddingVertical: 12,
     paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
-  riskDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginTop: 5,
-    marginRight: 10,
+  abodyBorderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,59,48,0.15)',
   },
-  timestamp: {
-    fontFamily: 'SpaceMono',
+
+  // Icon box
+  aicon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    flexShrink: 0,
+  },
+  aiconText: {
+    fontSize: 15,
+    color: Colors.t1,
+  },
+
+  // Info
+  ainfo: {
+    flex: 1,
+  },
+  atitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  atitle: {
+    fontFamily: Fonts.syneBold,
+    fontSize: 12,
+    color: Colors.t1,
+    flexShrink: 1,
+  },
+  newPill: {
+    backgroundColor: Colors.accent10,
+    borderWidth: 1,
+    borderColor: 'rgba(61,255,160,0.3)',
+    borderRadius: 3,
+    paddingVertical: 1,
+    paddingHorizontal: 5,
+  },
+  newPillText: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 7,
+    color: Colors.accent,
+    letterSpacing: 0.5,
+  },
+  abadges: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+
+  // Timestamp (normal mode)
+  atime: {
+    fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: '#888888',
-    letterSpacing: 0.3,
-    marginLeft: 8,
+    color: Colors.t2,
     flexShrink: 0,
   },
 
-  // ── Expanded details ───────────────────────────────────────────────────
-  expandedDetails: {
-    paddingHorizontal: 14,
-    paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#1e1e1e',
+  // Network badge
+  netBadge: {
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 4,
+    borderWidth: 1,
   },
-  detailRow: {
+  netBadgeText: {
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 8,
+    letterSpacing: 0.4,
+  },
+
+  // Action preview (HIGH only)
+  actPreview: {
+    backgroundColor: Colors.s2,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+    gap: 5,
+  },
+  actRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1e1e1e',
-  },
-  detailLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#555555',
-    letterSpacing: 0.8,
-  },
-  detailValue: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  acknowledgeBtn: {
-    marginTop: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(61,255,160,0.08)',
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255,59,48,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(61,255,160,0.2)',
-    alignItems: 'center',
+    borderColor: 'rgba(255,59,48,0.12)',
+    borderRadius: 8,
   },
-  acknowledgeBtnText: {
-    fontFamily: 'SpaceMono',
+  actRowLabel: {
+    fontFamily: Fonts.syneBold,
+    fontSize: 11,
+    color: Colors.t1,
+    flex: 1,
+  },
+  actRowArrow: {
     fontSize: 10,
-    color: '#3DFFA0',
-    fontWeight: '700',
-    letterSpacing: 0.3,
+    color: Colors.danger,
+  },
+  actMore: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 8,
+    color: Colors.t3,
+    textAlign: 'center',
+    paddingTop: 2,
   },
 });

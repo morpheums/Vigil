@@ -1,414 +1,430 @@
 // components/ActNowCard.tsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Full-screen modal for HIGH / CRITICAL alerts. Shows the risk indicator,
-// transaction summary, numbered action list, and Mark as Handled / Close.
-// ─────────────────────────────────────────────────────────────────────────────
+// Bottom-sheet modal for HIGH / CRITICAL alerts.
+// Matches screen-04-actnow.html mockup exactly.
 
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Linking,
-  SafeAreaView,
-} from 'react-native';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Alert as AlertType, ActNowAction } from '../hooks/useApi';
+import { Colors, Fonts, Radii } from '../constants/theme';
 
-// ── Props ────────────────────────────────────────────────────────────────────
+// -- Props --
 
 interface ActNowCardProps {
   alert: AlertType | null;
   visible: boolean;
   onClose: () => void;
   onAcknowledge: (alertId: number) => void;
-  /** Optional callback when an action is pressed. Return true to prevent default Linking behavior. */
   onActionPress?: (action: ActNowAction) => boolean;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers --
 
-function getRiskMeta(riskLevel: string): { label: string; color: string } {
-  const level = riskLevel.toUpperCase();
-  if (level === 'CRITICAL') return { label: 'CRITICAL', color: '#FF3B30' };
-  return { label: 'HIGH RISK', color: '#FF8C00' };
+function parseDirection(message: string): 'outgoing' | 'incoming' {
+  if (message.trim().startsWith('Sent')) return 'outgoing';
+  return 'incoming';
+}
+
+function parseAmount(message: string): string {
+  // e.g. "Sent 2,500 USDC" -> "2,500 USDC"
+  const match = message.match(/(?:Sent|Received)\s+(.+)/i);
+  return match ? match[1] : message;
+}
+
+function truncateAddress(addr: string): string {
+  if (addr.length <= 12) return addr;
+  return addr.slice(0, 6) + '...' + addr.slice(-4);
+}
+
+function getNetworkLabel(network?: string): string {
+  const labels: Record<string, string> = {
+    ethereum: 'Ethereum',
+    solana: 'Solana',
+    tron: 'Tron',
+    'cosmoshub-4': 'Cosmos Hub',
+    'osmosis-1': 'Osmosis',
+    stellar: 'Stellar',
+  };
+  return network ? labels[network] || network : 'Ethereum';
 }
 
 function getUrgencyColor(urgency: string): string {
   switch (urgency) {
-    case 'critical': return '#FF3B30';
-    case 'high': return '#FF8C00';
-    case 'medium': return '#F5A623';
-    default: return '#888888';
+    case 'critical': return Colors.danger;
+    case 'high': return Colors.warn;
+    case 'medium': return Colors.accent;
+    default: return Colors.t2;
   }
 }
 
-function truncateTxHash(hash: string): string {
-  if (hash.length <= 16) return hash;
-  return hash.slice(0, 10) + '...' + hash.slice(-6);
+function getUrgencyBg(urgency: string): { bg: string; border: string } {
+  switch (urgency) {
+    case 'critical': return { bg: 'rgba(255,59,48,0.06)', border: 'rgba(255,59,48,0.2)' };
+    case 'high': return { bg: 'rgba(245,166,35,0.06)', border: 'rgba(245,166,35,0.2)' };
+    case 'medium': return { bg: 'rgba(61,255,160,0.04)', border: 'rgba(61,255,160,0.15)' };
+    default: return { bg: 'rgba(136,136,136,0.04)', border: 'rgba(136,136,136,0.15)' };
+  }
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
+function isSanctioned(alert: AlertType): boolean {
+  return (
+    alert.risk_level.toUpperCase() === 'CRITICAL' ||
+    alert.message.toLowerCase().includes('sanction') ||
+    alert.act_now_actions.some(a =>
+      a.label.toLowerCase().includes('sanction') ||
+      a.description.toLowerCase().includes('sanction')
+    )
+  );
+}
 
-export default function ActNowCard({ alert, visible, onClose, onAcknowledge, onActionPress }: ActNowCardProps) {
-  if (!alert) return null;
+// -- Component --
 
-  const { label: riskLabel, color: riskColor } = getRiskMeta(alert.risk_level);
+export default function ActNowCard({
+  alert,
+  visible,
+  onClose,
+  onAcknowledge,
+  onActionPress,
+}: ActNowCardProps) {
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+  useEffect(() => {
+    if (visible && alert) {
+      bottomSheetRef.current?.present();
+    } else {
+      bottomSheetRef.current?.dismiss();
+    }
+  }, [visible, alert]);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.6}
+      />
+    ),
+    []
+  );
 
   const handleActionPress = async (action: ActNowAction) => {
-    // Let parent handle the action first; if it returns true, skip default behavior
-    if (onActionPress && onActionPress(action)) {
-      return;
-    }
+    if (onActionPress && onActionPress(action)) return;
 
     const target = action.url || action.deeplink;
     if (target) {
       try {
         const canOpen = await Linking.canOpenURL(target);
-        if (canOpen) {
-          await Linking.openURL(target);
-        }
+        if (canOpen) await Linking.openURL(target);
       } catch {
-        // silently fail — URL not supported
+        // silently fail
       }
     }
   };
 
   const handleMarkHandled = () => {
-    onAcknowledge(alert.id);
-    onClose();
+    if (alert) {
+      onAcknowledge(alert.id);
+      onClose();
+    }
   };
 
+  if (!alert) return null;
+
+  const direction = parseDirection(alert.message);
+  const amount = parseAmount(alert.message);
+  const network = (alert as any).wallet_network || undefined;
+  const riskScore = (alert as any).risk_score ?? 8.2;
+  const sanctioned = isSanctioned(alert);
+
+  // Counterparty address from first action or fallback
+  const counterpartyAddr =
+    alert.act_now_actions.find(a => a.counterparty)?.counterparty ||
+    alert.tx_hash;
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="fullScreen"
-      onRequestClose={onClose}
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      snapPoints={['90%']}
+      backgroundStyle={styles.sheetBg}
+      handleIndicatorStyle={styles.handleIndicator}
+      backdropComponent={renderBackdrop}
+      onDismiss={onClose}
+      enablePanDownToClose
     >
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* ── Risk indicator ──────────────────────────────────────────── */}
-            <View style={[styles.riskBadge, { backgroundColor: riskColor + '15', borderColor: riskColor + '40' }]}>
-              <Text style={[styles.riskEmoji]}>{'🚨'}</Text>
-              <Text style={[styles.riskLabel, { color: riskColor }]}>{riskLabel}</Text>
+      <BottomSheetScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Risk Header */}
+        <View style={styles.riskHeader}>
+          <View style={styles.riskIndicator}>
+            <View style={styles.riskIcon}>
+              <Text style={styles.riskIconEmoji}>{'\u{1F6A8}'}</Text>
             </View>
-
-            {/* ── Wallet info ─────────────────────────────────────────────── */}
-            {alert.wallet_label && (
-              <Text style={styles.walletLabel}>{alert.wallet_label}</Text>
-            )}
-            <Text style={styles.walletAddress}>
-              {alert.wallet_address.slice(0, 10)}...{alert.wallet_address.slice(-6)}
-            </Text>
-
-            {/* ── Transaction summary ─────────────────────────────────────── */}
-            <View style={styles.summaryCard}>
-              <Text style={styles.sectionTitle}>TRANSACTION SUMMARY</Text>
-              <Text style={styles.summaryMessage}>{alert.message}</Text>
-              <View style={styles.txRow}>
-                <Text style={styles.txLabel}>TX HASH</Text>
-                <Text style={styles.txValue}>{truncateTxHash(alert.tx_hash)}</Text>
+            <View style={styles.riskLabelWrap}>
+              <Text style={styles.riskLabel}>HIGH RISK</Text>
+              <View style={styles.riskScoreRow}>
+                <View style={styles.riskBarWrap}>
+                  <View style={[styles.riskBar, { width: `${riskScore * 10}%` }]} />
+                </View>
+                <Text style={styles.riskScoreNum}>{riskScore.toFixed(1)} / 10</Text>
               </View>
             </View>
+          </View>
 
-            {/* ── Action list ─────────────────────────────────────────────── */}
-            {alert.act_now_actions.length > 0 && (
-              <View style={styles.actionsSection}>
-                <Text style={styles.sectionTitle}>RECOMMENDED ACTIONS</Text>
-                {alert.act_now_actions.map((action, index) => {
-                  const urgencyColor = getUrgencyColor(action.urgency);
-                  const hasLink = !!(action.url || action.deeplink || onActionPress);
-
-                  return (
-                    <TouchableOpacity
-                      key={action.id}
-                      style={styles.actionCard}
-                      onPress={() => handleActionPress(action)}
-                      activeOpacity={hasLink ? 0.7 : 1}
-                      disabled={!hasLink}
-                    >
-                      {/* Number badge */}
-                      <View style={[styles.numberBadge, { backgroundColor: urgencyColor + '20', borderColor: urgencyColor + '40' }]}>
-                        <Text style={[styles.numberText, { color: urgencyColor }]}>
-                          {index + 1}
-                        </Text>
-                      </View>
-
-                      {/* Content */}
-                      <View style={styles.actionContent}>
-                        <View style={styles.actionHeader}>
-                          <Text style={styles.actionTitle}>{action.label}</Text>
-                          <View style={[styles.urgencyPill, { backgroundColor: urgencyColor + '15', borderColor: urgencyColor + '30' }]}>
-                            <Text style={[styles.urgencyText, { color: urgencyColor }]}>
-                              {action.urgency.toUpperCase()}
-                            </Text>
-                          </View>
-                        </View>
-                        <Text style={styles.actionDescription}>{action.description}</Text>
-                        {action.counterparty && (
-                          <Text style={styles.counterparty}>
-                            Counterparty: {action.counterparty.slice(0, 8)}...{action.counterparty.slice(-4)}
-                          </Text>
-                        )}
-                        {hasLink && (
-                          <Text style={styles.actionLink}>Open link {'→'}</Text>
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+          {/* TX Details Box */}
+          <View style={styles.txBox}>
+            <View style={styles.txRow}>
+              <Text style={styles.txKey}>DIRECTION</Text>
+              <Text style={[styles.txVal, {
+                color: direction === 'outgoing' ? Colors.danger : Colors.accent,
+              }]}>
+                {direction === 'outgoing' ? '\u2191 OUTGOING' : '\u2193 INCOMING'}
+              </Text>
+            </View>
+            <View style={styles.txRow}>
+              <Text style={styles.txKey}>AMOUNT</Text>
+              <Text style={styles.txVal}>{amount}</Text>
+            </View>
+            <View style={styles.txRow}>
+              <Text style={styles.txKey}>NETWORK</Text>
+              <Text style={styles.txVal}>{getNetworkLabel(network)}</Text>
+            </View>
+            <View style={styles.txRow}>
+              <Text style={styles.txKey}>TO</Text>
+              <Text style={styles.txVal}>{truncateAddress(counterpartyAddr)}</Text>
+            </View>
+            {sanctioned && (
+              <View style={[styles.txRow, { marginBottom: 0 }]}>
+                <Text style={styles.txKey}>OFAC</Text>
+                <Text style={[styles.txVal, { color: Colors.danger }]}>
+                  {'\u26A0'} SANCTIONED
+                </Text>
               </View>
             )}
-          </ScrollView>
-
-          {/* ── Bottom buttons ───────────────────────────────────────────── */}
-          <View style={styles.bottomButtons}>
-            <TouchableOpacity
-              style={styles.markHandledBtn}
-              onPress={handleMarkHandled}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.markHandledText}>Mark as Handled</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.closeBtnText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
-      </SafeAreaView>
-    </Modal>
+
+        {/* Actions */}
+        {alert.act_now_actions.length > 0 && (
+          <View style={styles.actions}>
+            <Text style={styles.actionsTitle}>RECOMMENDED ACTIONS</Text>
+            {alert.act_now_actions.map((action, index) => {
+              const urgencyColor = getUrgencyColor(action.urgency);
+              const urgencyBg = getUrgencyBg(action.urgency);
+              const num = String(index + 1).padStart(2, '0');
+
+              return (
+                <TouchableOpacity
+                  key={action.id}
+                  style={[styles.actionCard, {
+                    backgroundColor: urgencyBg.bg,
+                    borderColor: urgencyBg.border,
+                  }]}
+                  onPress={() => handleActionPress(action)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.actionNum, { color: urgencyColor }]}>{num}</Text>
+                  <View style={styles.actionContent}>
+                    <Text style={styles.actionLabel}>{action.label}</Text>
+                    <Text style={styles.actionDesc}>{action.description}</Text>
+                  </View>
+                  <Text style={[styles.actionArrow, { color: urgencyColor }]}>{'\u2192'}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+      </BottomSheetScrollView>
+
+      {/* Mark as Handled button */}
+      <TouchableOpacity
+        style={styles.handledBtn}
+        onPress={handleMarkHandled}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.handledBtnText}>{'\u2713'} Mark as Handled</Text>
+      </TouchableOpacity>
+    </BottomSheetModal>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// -- Styles --
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#080808',
+  sheetBg: {
+    backgroundColor: Colors.s1,
+    borderTopLeftRadius: Radii.sheet,
+    borderTopRightRadius: Radii.sheet,
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#080808',
+  handleIndicator: {
+    backgroundColor: Colors.border2,
+    width: 40,
+    height: 4,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 32,
+    paddingBottom: 16,
   },
 
-  // ── Risk indicator ────────────────────────────────────────────────────
-  riskBadge: {
+  // Risk Header
+  riskHeader: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  riskIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 12,
-    marginBottom: 20,
+    gap: 14,
+    marginBottom: 12,
   },
-  riskEmoji: {
-    fontSize: 20,
-    marginRight: 10,
+  riskIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,59,48,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,59,48,0.25)',
+    flexShrink: 0,
+  },
+  riskIconEmoji: {
+    fontSize: 24,
+  },
+  riskLabelWrap: {
+    flex: 1,
   },
   riskLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 2,
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 26,
+    color: Colors.danger,
+    lineHeight: 30,
+    letterSpacing: -0.5,
   },
-
-  // ── Wallet info ───────────────────────────────────────────────────────
-  walletLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
+  riskScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
   },
-  walletAddress: {
-    fontFamily: 'SpaceMono',
+  riskBarWrap: {
+    flex: 1,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+  },
+  riskBar: {
+    height: '100%',
+    borderRadius: 2,
+    // Approximate gradient with a solid mix of warn-to-danger
+    backgroundColor: Colors.danger,
+  },
+  riskScoreNum: {
+    fontFamily: Fonts.spaceMono,
     fontSize: 10,
-    color: '#888888',
-    textAlign: 'center',
-    marginBottom: 20,
-    letterSpacing: 0.3,
+    color: Colors.danger,
+    fontWeight: '700',
   },
 
-  // ── Summary card ──────────────────────────────────────────────────────
-  summaryCard: {
-    backgroundColor: '#111111',
-    borderRadius: 12,
+  // TX Details Box
+  txBox: {
+    backgroundColor: Colors.s2,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#242424',
-    padding: 16,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#555555',
-    letterSpacing: 1.8,
-    marginBottom: 10,
-  },
-  summaryMessage: {
-    fontFamily: 'SpaceMono',
-    fontSize: 13,
-    color: '#FFFFFF',
-    lineHeight: 20,
-    marginBottom: 12,
+    borderColor: Colors.border,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   txRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#1e1e1e',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  txLabel: {
-    fontFamily: 'SpaceMono',
+  txKey: {
+    fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: '#555555',
-    letterSpacing: 0.8,
+    color: Colors.t2,
+    letterSpacing: 0.6,
   },
-  txValue: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    color: '#FFFFFF',
+  txVal: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t1,
     fontWeight: '700',
   },
 
-  // ── Actions ───────────────────────────────────────────────────────────
-  actionsSection: {
-    marginBottom: 20,
+  // Actions
+  actions: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    flex: 1,
+  },
+  actionsTitle: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t3,
+    letterSpacing: 1.8,
+    marginBottom: 10,
   },
   actionCard: {
     flexDirection: 'row',
-    backgroundColor: '#111111',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: 12,
     borderRadius: 12,
+    marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#242424',
-    padding: 14,
-    marginBottom: 10,
   },
-  numberBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-    marginTop: 2,
-  },
-  numberText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 12,
+  actionNum: {
+    fontFamily: Fonts.spaceMono,
     fontWeight: '700',
+    fontSize: 11,
+    width: 20,
+    flexShrink: 0,
+    paddingTop: 1,
   },
   actionContent: {
     flex: 1,
   },
-  actionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  actionTitle: {
-    fontFamily: 'SpaceMono',
+  actionLabel: {
+    fontFamily: Fonts.syneBold,
     fontSize: 12,
-    color: '#FFFFFF',
-    fontWeight: '700',
-    flex: 1,
-    marginRight: 8,
+    color: Colors.t1,
+    marginBottom: 3,
   },
-  urgencyPill: {
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  urgencyText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 8,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  actionDescription: {
-    fontFamily: 'SpaceMono',
+  actionDesc: {
+    fontFamily: Fonts.interRegular,
     fontSize: 11,
-    color: '#aaaaaa',
-    lineHeight: 16,
-    marginBottom: 6,
+    color: Colors.t2,
+    lineHeight: 22,
   },
-  counterparty: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#666666',
-    marginBottom: 4,
-  },
-  actionLink: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    color: '#3DFFA0',
-    fontWeight: '700',
-    marginTop: 2,
+  actionArrow: {
+    fontSize: 12,
+    paddingTop: 2,
   },
 
-  // ── Bottom buttons ────────────────────────────────────────────────────
-  bottomButtons: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#242424',
-    gap: 10,
-  },
-  markHandledBtn: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: 'rgba(61,255,160,0.1)',
+  // Mark as Handled
+  handledBtn: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    padding: 13,
+    borderRadius: 10,
+    backgroundColor: Colors.s2,
     borderWidth: 1,
-    borderColor: 'rgba(61,255,160,0.25)',
+    borderColor: Colors.border,
     alignItems: 'center',
   },
-  markHandledText: {
-    fontFamily: 'SpaceMono',
+  handledBtnText: {
+    fontFamily: Fonts.syneBold,
     fontSize: 13,
-    color: '#3DFFA0',
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  closeBtn: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#181818',
-    borderWidth: 1,
-    borderColor: '#242424',
-    alignItems: 'center',
-  },
-  closeBtnText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 13,
-    color: '#888888',
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    color: Colors.t2,
   },
 });

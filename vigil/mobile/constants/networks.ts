@@ -10,7 +10,7 @@ export const NETWORKS: Network[] = [
   { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#9945FF' },
   { id: 'tron', name: 'Tron', symbol: 'TRX', color: '#FF4040' },
   { id: 'cosmoshub-4', name: 'Cosmos', symbol: 'ATOM', color: '#6B75CA' },
-  { id: 'osmosis-1', name: 'Osmosis', symbol: 'OSMO', color: '#5E12A0' },
+  { id: 'osmosis-1', name: 'Osmosis', symbol: 'OSMO', color: '#750BBB' },
   { id: 'stellar', name: 'Stellar', symbol: 'XLM', color: '#0099CC' },
 ];
 

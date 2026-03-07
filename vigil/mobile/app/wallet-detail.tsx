@@ -10,7 +10,10 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useApi, Wallet, ContagionResult } from '../hooks/useApi';
+import { Colors, Fonts, Radii } from '../constants/theme';
+import { NETWORKS } from '../constants/networks';
 import ContagionGraph from '../components/ContagionGraph';
+import RiskBadge from '../components/RiskBadge';
 
 function truncateAddress(address: string): string {
   if (address.length <= 12) return address;
@@ -18,11 +21,30 @@ function truncateAddress(address: string): string {
 }
 
 function contagionColor(score: number): string {
-  if (score < 2) return '#3DFFA0';
-  if (score < 4) return '#3DFFA0';
-  if (score < 6) return '#F5A623';
-  if (score < 8) return '#FF3B30';
-  return '#FF2D55';
+  if (score < 2) return Colors.accent;
+  if (score < 4) return Colors.accent;
+  if (score < 6) return Colors.warn;
+  if (score < 8) return Colors.danger;
+  return Colors.critical;
+}
+
+function riskLevel(score: number): string {
+  if (score < 2) return 'VERY LOW';
+  if (score < 4) return 'LOW';
+  if (score < 6) return 'MEDIUM';
+  if (score < 8) return 'HIGH';
+  return 'CRITICAL';
+}
+
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 export default function WalletDetailScreen() {
@@ -100,7 +122,7 @@ export default function WalletDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#3DFFA0" />
+        <ActivityIndicator size="large" color={Colors.accent} />
       </View>
     );
   }
@@ -125,89 +147,133 @@ export default function WalletDetailScreen() {
 
   if (!wallet) return null;
 
+  const networkInfo = NETWORKS.find((n) => n.id === wallet.network);
+  const networkColor = networkInfo?.color || Colors.t2;
+  const networkSymbol = networkInfo?.symbol || wallet.network.toUpperCase();
+  const score = contagion?.contagionScore ?? 0;
+  const scoreColor = contagionColor(score);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Back row */}
+        <View style={styles.backRow}>
           <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-            <Text style={styles.backText}>Back</Text>
+            <Text style={styles.backText}>{'\u2190'} Back</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {wallet.label || 'Wallet'}
-          </Text>
-          <View style={{ width: 40 }} />
         </View>
 
-        {/* Wallet Info */}
-        <View style={styles.walletInfo}>
-          <Text style={styles.walletLabel}>
-            {wallet.label || 'Unnamed Wallet'}
-          </Text>
-          <Text style={styles.walletAddress}>
-            {truncateAddress(wallet.address)}
-          </Text>
-          <Text style={styles.walletNetwork}>{wallet.network}</Text>
-        </View>
-
-        {/* Contagion Score Summary */}
-        {contagion && (
-          <View style={styles.scoreSummary}>
-            <Text style={styles.scoreLabel}>CONTAGION SCORE</Text>
-            <View style={styles.scoreRow}>
+        {/* Detail header */}
+        <View style={styles.detailHeader}>
+          <View style={styles.detailNameRow}>
+            <Text style={styles.detailName}>
+              {wallet.label || 'Wallet'}
+            </Text>
+            {/* Network badge */}
+            <View
+              style={[
+                styles.networkBadge,
+                {
+                  borderColor: networkColor + '4D',
+                  backgroundColor: networkColor + '1A',
+                },
+              ]}
+            >
               <Text
-                style={[
-                  styles.scoreNumber,
-                  { color: contagionColor(contagion.contagionScore) },
-                ]}
+                style={[styles.networkBadgeText, { color: networkColor }]}
               >
-                {contagion.contagionScore.toFixed(1)}
+                {networkSymbol}
               </Text>
-              <Text style={styles.scoreOutOf}> / 10</Text>
             </View>
-            <Text style={styles.scoreSubtitle}>
-              {contagion.highRiskCount > 0
-                ? `${contagion.highRiskCount} of ${contagion.nodeCount} neighbors are high risk`
-                : `${contagion.nodeCount} neighbors — no risks detected`}
-            </Text>
+            {/* Risk badge */}
+            <RiskBadge riskLevel={riskLevel(score)} />
+          </View>
+          <Text style={styles.detailAddr}>{wallet.address}</Text>
+
+          {/* Stats grid */}
+          <View style={styles.statsGrid}>
+            <View style={styles.stat}>
+              <Text style={styles.statVal}>N/A</Text>
+              <Text style={styles.statKey}>BALANCE</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={[styles.statVal, { color: scoreColor }]}>
+                {score.toFixed(1)}
+              </Text>
+              <Text style={styles.statKey}>CONTAGION</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statVal}>
+                {wallet.last_activity
+                  ? relativeTime(wallet.last_activity)
+                  : '--'}
+              </Text>
+              <Text style={styles.statKey}>LAST TX</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Contagion section */}
+        {contagion && (
+          <View style={styles.csection}>
+            <View style={styles.ctitleRow}>
+              <View>
+                <Text style={styles.cScoreLabel}>CONTAGION SCORE</Text>
+                <View style={styles.cScoreRow}>
+                  <Text style={[styles.cScoreBig, { color: scoreColor }]}>
+                    {score.toFixed(1)}
+                  </Text>
+                  <Text style={styles.cScoreOutOf}> / 10</Text>
+                </View>
+                <Text style={styles.cSub}>
+                  {contagion.highRiskCount > 0
+                    ? `${contagion.highRiskCount} of ${contagion.nodeCount} neighbors are high risk`
+                    : `${contagion.nodeCount} neighbors \u2014 no risks detected`}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.refreshBtn,
+                  refreshingContagion && styles.buttonDisabled,
+                ]}
+                onPress={handleRefreshContagion}
+                disabled={refreshingContagion}
+                activeOpacity={0.7}
+              >
+                {refreshingContagion ? (
+                  <ActivityIndicator color={Colors.accent} size="small" />
+                ) : (
+                  <Text style={styles.refreshBtnText}>REFRESH</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Graph */}
+            {contagion.nodes.length > 0 ? (
+              <ContagionGraph
+                nodes={contagion.nodes as any}
+                contagionScore={contagion.contagionScore}
+                rootAddress={wallet.address}
+              />
+            ) : (
+              <View style={styles.emptyGraph}>
+                <Text style={styles.emptyGraphText}>
+                  No contagion data available yet.
+                </Text>
+              </View>
+            )}
           </View>
         )}
 
-        {/* Contagion Graph */}
-        {contagion && contagion.nodes.length > 0 && (
-          <View style={styles.graphSection}>
-            <ContagionGraph
-              nodes={contagion.nodes as any}
-              contagionScore={contagion.contagionScore}
-              rootAddress={wallet.address}
-            />
-          </View>
-        )}
-
-        {contagion && contagion.nodes.length === 0 && (
-          <View style={styles.emptyGraph}>
-            <Text style={styles.emptyGraphText}>
-              No contagion data available yet.
-            </Text>
-          </View>
-        )}
-
-        {/* Refresh Contagion Button */}
-        <TouchableOpacity
-          style={[
-            styles.refreshButton,
-            refreshingContagion && styles.buttonDisabled,
-          ]}
-          onPress={handleRefreshContagion}
-          disabled={refreshingContagion}
-          activeOpacity={0.8}
-        >
-          {refreshingContagion ? (
-            <ActivityIndicator color="#080808" />
-          ) : (
-            <Text style={styles.refreshButtonText}>Refresh Contagion</Text>
-          )}
-        </TouchableOpacity>
+        {/* Recent Transactions placeholder */}
+        <View style={styles.txSectionHeader}>
+          <Text style={styles.txSectionLabel}>RECENT TRANSACTIONS</Text>
+        </View>
+        <View style={styles.txPlaceholder}>
+          <Text style={styles.txPlaceholderText}>
+            Transaction history coming soon
+          </Text>
+        </View>
 
         {/* Delete Wallet Button */}
         <TouchableOpacity
@@ -217,7 +283,7 @@ export default function WalletDetailScreen() {
           activeOpacity={0.8}
         >
           {deleting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={Colors.danger} />
           ) : (
             <Text style={styles.deleteButtonText}>Delete Wallet</Text>
           )}
@@ -230,167 +296,236 @@ export default function WalletDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#080808',
+    backgroundColor: Colors.bg,
   },
   centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#080808',
+    backgroundColor: Colors.bg,
     paddingHorizontal: 24,
   },
   scrollContent: {
     paddingBottom: 60,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#242424',
+
+  // Back row
+  backRow: {
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
   backText: {
-    color: '#3DFFA0',
-    fontSize: 16,
-    fontWeight: '500',
+    fontFamily: Fonts.spaceMono,
+    fontSize: 10,
+    color: Colors.accent,
   },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 8,
-  },
-  walletInfo: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
+
+  // Detail header
+  detailHeader: {
+    paddingHorizontal: 18,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#181818',
+    borderBottomColor: Colors.border,
   },
-  walletLabel: {
-    color: '#FFFFFF',
-    fontSize: 22,
+  detailNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  detailName: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 16,
+    color: Colors.t1,
+  },
+  networkBadge: {
+    borderRadius: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderWidth: 1,
+  },
+  networkBadgeText: {
+    fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  walletAddress: {
-    color: '#888888',
-    fontSize: 14,
-    fontFamily: 'Courier',
-    marginBottom: 4,
-  },
-  walletNetwork: {
-    color: '#888888',
-    fontSize: 12,
-    textTransform: 'uppercase',
+    fontSize: 8,
     letterSpacing: 0.5,
   },
-  scoreSummary: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
-  },
-  scoreLabel: {
+  detailAddr: {
+    fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: '#888888',
+    color: Colors.t3,
+    marginBottom: 8,
+  },
+
+  // Stats grid
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  stat: {
+    flex: 1,
+    backgroundColor: Colors.s2,
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  statVal: {
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 14,
+    color: Colors.t1,
+    marginBottom: 2,
+  },
+  statKey: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 8,
+    color: Colors.t3,
+    letterSpacing: 0.8,
+  },
+
+  // Contagion section
+  csection: {
+    padding: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  ctitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  cScoreLabel: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t3,
     letterSpacing: 1.8,
     marginBottom: 4,
-    textTransform: 'uppercase',
   },
-  scoreRow: {
+  cScoreRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    gap: 6,
   },
-  scoreNumber: {
-    fontSize: 36,
-    fontWeight: '800',
-    lineHeight: 40,
+  cScoreBig: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 32,
+    lineHeight: 36,
   },
-  scoreOutOf: {
-    fontSize: 12,
-    color: '#555555',
+  cScoreOutOf: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 11,
+    color: Colors.t2,
   },
-  scoreSubtitle: {
-    fontSize: 12,
-    color: '#888888',
-    marginTop: 4,
+  cSub: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t2,
+    marginTop: 3,
   },
-  graphSection: {
-    marginHorizontal: 16,
-    marginBottom: 20,
-  },
-  emptyGraph: {
-    marginHorizontal: 16,
-    marginBottom: 20,
-    backgroundColor: '#111111',
-    borderRadius: 12,
+
+  // Refresh button (subtle)
+  refreshBtn: {
+    backgroundColor: Colors.accent10,
     borderWidth: 1,
-    borderColor: '#242424',
+    borderColor: Colors.accent20,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  refreshBtnText: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.accent,
+    letterSpacing: 0.6,
+  },
+
+  // Empty graph
+  emptyGraph: {
+    backgroundColor: Colors.s1,
+    borderRadius: Radii.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
     padding: 32,
     alignItems: 'center',
   },
   emptyGraphText: {
-    color: '#888888',
-    fontSize: 14,
+    fontFamily: Fonts.interRegular,
+    color: Colors.t2,
+    fontSize: 13,
     textAlign: 'center',
   },
-  refreshButton: {
-    backgroundColor: '#3DFFA0',
-    borderRadius: 12,
-    padding: 16,
+
+  // TX section
+  txSectionHeader: {
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  txSectionLabel: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t3,
+    letterSpacing: 1.8,
+  },
+  txPlaceholder: {
+    marginHorizontal: 18,
+    marginTop: 8,
+    marginBottom: 20,
+    backgroundColor: Colors.s1,
+    borderRadius: Radii.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 24,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    minHeight: 52,
   },
-  refreshButtonText: {
-    color: '#080808',
-    fontSize: 16,
-    fontWeight: '700',
+  txPlaceholderText: {
+    fontFamily: Fonts.interRegular,
+    color: Colors.t2,
+    fontSize: 12,
   },
+
+  // Delete button
   deleteButton: {
     backgroundColor: 'transparent',
-    borderRadius: 12,
+    borderRadius: Radii.button,
     borderWidth: 1,
-    borderColor: '#FF3B30',
-    padding: 16,
+    borderColor: Colors.danger,
+    padding: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: 18,
     marginBottom: 12,
-    minHeight: 52,
   },
   deleteButtonText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Fonts.syneBold,
+    color: Colors.danger,
+    fontSize: 14,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   errorText: {
-    color: '#FF3B30',
+    fontFamily: Fonts.interRegular,
+    color: Colors.danger,
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#181818',
+    backgroundColor: Colors.s2,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#242424',
+    borderColor: Colors.border,
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
   retryButtonText: {
-    color: '#3DFFA0',
-    fontSize: 15,
-    fontWeight: '600',
+    fontFamily: Fonts.spaceMono,
+    color: Colors.accent,
+    fontSize: 13,
   },
 });

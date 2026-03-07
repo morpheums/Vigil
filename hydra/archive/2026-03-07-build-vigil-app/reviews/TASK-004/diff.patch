@@ -1,0 +1,314 @@
+diff --git a/vigil/backend/contagion.js b/vigil/backend/contagion.js
+new file mode 100644
+index 0000000..8ca71cb
+--- /dev/null
++++ b/vigil/backend/contagion.js
+@@ -0,0 +1,69 @@
++const { getAddressConnections, getAddressRisk } = require('./range');
++const { saveContagionGraph } = require('./db');
++
++const RISK_WEIGHTS = {
++  VERY_LOW: 0,
++  LOW: 1,
++  MEDIUM: 4,
++  HIGH: 8,
++  CRITICAL: 10,
++  UNKNOWN: 2,
++};
++
++async function calculateContagionScore(walletId, address, network) {
++  // 1. Get up to 15 counterparties
++  const { connections } = await getAddressConnections(address, network, 15);
++
++  // 2. Risk-score ALL counterparties in parallel
++  const riskResults = await Promise.all(
++    connections.map(c =>
++      getAddressRisk(c.address, c.network).catch(() => null)
++    )
++  );
++
++  // 3. Build scored nodes
++  const nodes = connections.map((c, i) => ({
++    address: c.address,
++    network: c.network,
++    riskLevel: riskResults[i]?.risk_level || 'UNKNOWN',
++    riskScore: riskResults[i]?.risk_score || 0,
++    label: c.label || null,
++    transferCount: c.transfer_count || 1,
++  }));
++
++  // 4. Weighted average
++  const totalWeight = nodes.reduce((s, n) => s + n.transferCount, 0);
++  const weightedSum = nodes.reduce(
++    (s, n) => s + RISK_WEIGHTS[n.riskLevel] * n.transferCount,
++    0
++  );
++  const score = totalWeight > 0 ? Math.min(10, weightedSum / totalWeight) : 0;
++
++  // 5. Save to DB
++  saveContagionGraph(walletId, address, nodes);
++
++  // 6. Update wallet contagion_score
++  const db = require('./db').getDb();
++  db.prepare(
++    'UPDATE wallets SET contagion_score = ?, contagion_updated_at = CURRENT_TIMESTAMP WHERE id = ?'
++  ).run(parseFloat(score.toFixed(1)), walletId);
++
++  return {
++    contagionScore: parseFloat(score.toFixed(1)),
++    nodeCount: nodes.length,
++    highRiskCount: nodes.filter(n =>
++      ['HIGH', 'CRITICAL'].includes(n.riskLevel)
++    ).length,
++    nodes,
++  };
++}
++
++function getContagionLabel(score) {
++  if (score < 2) return { label: 'CLEAN', color: '#3DFFA0' };
++  if (score < 4) return { label: 'LOW RISK', color: '#3DFFA0' };
++  if (score < 6) return { label: 'MODERATE', color: '#F5A623' };
++  if (score < 8) return { label: 'CONTAMINATED', color: '#FF3B30' };
++  return { label: 'CRITICAL', color: '#FF2D55' };
++}
++
++module.exports = { calculateContagionScore, getContagionLabel, RISK_WEIGHTS };
+diff --git a/vigil/backend/__tests__/contagion.test.js b/vigil/backend/__tests__/contagion.test.js
+new file mode 100644
+index 0000000..1e30763
+--- /dev/null
++++ b/vigil/backend/__tests__/contagion.test.js
+@@ -0,0 +1,233 @@
++const path = require('path');
++
++// Mock range.js
++jest.mock('../range', () => ({
++  getAddressConnections: jest.fn(),
++  getAddressRisk: jest.fn(),
++}));
++
++// Mock db.js
++jest.mock('../db', () => {
++  const mockRun = jest.fn();
++  const mockPrepare = jest.fn(() => ({ run: mockRun }));
++  return {
++    saveContagionGraph: jest.fn(),
++    getDb: jest.fn(() => ({ prepare: mockPrepare })),
++    __mockRun: mockRun,
++    __mockPrepare: mockPrepare,
++  };
++});
++
++const { getAddressConnections, getAddressRisk } = require('../range');
++const { saveContagionGraph, getDb } = require('../db');
++const { calculateContagionScore, getContagionLabel, RISK_WEIGHTS } = require('../contagion');
++
++beforeEach(() => {
++  jest.clearAllMocks();
++});
++
++describe('RISK_WEIGHTS', () => {
++  it('has correct weight values', () => {
++    expect(RISK_WEIGHTS).toEqual({
++      VERY_LOW: 0,
++      LOW: 1,
++      MEDIUM: 4,
++      HIGH: 8,
++      CRITICAL: 10,
++      UNKNOWN: 2,
++    });
++  });
++});
++
++describe('calculateContagionScore', () => {
++  it('calculates score for 3 LOW + 2 HIGH counterparties', async () => {
++    // 3 LOW (weight 1, transfer_count 1 each) + 2 HIGH (weight 8, transfer_count 1 each)
++    // weightedSum = 3*1*1 + 2*8*1 = 3 + 16 = 19
++    // totalWeight = 5
++    // score = 19 / 5 = 3.8
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum', transfer_count: 1 },
++        { address: '0xB', network: 'ethereum', transfer_count: 1 },
++        { address: '0xC', network: 'ethereum', transfer_count: 1 },
++        { address: '0xD', network: 'ethereum', transfer_count: 1 },
++        { address: '0xE', network: 'ethereum', transfer_count: 1 },
++      ],
++    });
++
++    getAddressRisk
++      .mockResolvedValueOnce({ risk_level: 'LOW', risk_score: 15 })
++      .mockResolvedValueOnce({ risk_level: 'LOW', risk_score: 20 })
++      .mockResolvedValueOnce({ risk_level: 'LOW', risk_score: 10 })
++      .mockResolvedValueOnce({ risk_level: 'HIGH', risk_score: 80 })
++      .mockResolvedValueOnce({ risk_level: 'HIGH', risk_score: 85 });
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(3.8);
++    expect(result.nodeCount).toBe(5);
++    expect(result.highRiskCount).toBe(2);
++    expect(result.nodes).toHaveLength(5);
++
++    // Verify getAddressConnections was called correctly
++    expect(getAddressConnections).toHaveBeenCalledWith('0xROOT', 'ethereum', 15);
++
++    // Verify saveContagionGraph was called
++    expect(saveContagionGraph).toHaveBeenCalledWith(1, '0xROOT', expect.any(Array));
++
++    // Verify wallet update
++    expect(getDb).toHaveBeenCalled();
++  });
++
++  it('defaults to UNKNOWN when all risk calls return null', async () => {
++    // 3 connections, all risk calls fail -> UNKNOWN (weight 2)
++    // weightedSum = 3 * 2 * 1 = 6
++    // totalWeight = 3
++    // score = 6 / 3 = 2.0
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum', transfer_count: 1 },
++        { address: '0xB', network: 'ethereum', transfer_count: 1 },
++        { address: '0xC', network: 'ethereum', transfer_count: 1 },
++      ],
++    });
++
++    getAddressRisk
++      .mockRejectedValueOnce(new Error('API error'))
++      .mockRejectedValueOnce(new Error('API error'))
++      .mockRejectedValueOnce(new Error('API error'));
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(2);
++    expect(result.nodeCount).toBe(3);
++    expect(result.highRiskCount).toBe(0);
++    result.nodes.forEach(node => {
++      expect(node.riskLevel).toBe('UNKNOWN');
++      expect(node.riskScore).toBe(0);
++    });
++  });
++
++  it('handles mixed successes and failures in risk calls', async () => {
++    // 1 LOW (success) + 1 UNKNOWN (failure), each transfer_count=1
++    // weightedSum = 1*1 + 2*1 = 3
++    // totalWeight = 2
++    // score = 3 / 2 = 1.5
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum', transfer_count: 1 },
++        { address: '0xB', network: 'ethereum', transfer_count: 1 },
++      ],
++    });
++
++    getAddressRisk
++      .mockResolvedValueOnce({ risk_level: 'LOW', risk_score: 10 })
++      .mockRejectedValueOnce(new Error('timeout'));
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(1.5);
++    expect(result.nodes[0].riskLevel).toBe('LOW');
++    expect(result.nodes[1].riskLevel).toBe('UNKNOWN');
++  });
++
++  it('returns score 0 for 0 connections', async () => {
++    getAddressConnections.mockResolvedValue({ connections: [] });
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(0);
++    expect(result.nodeCount).toBe(0);
++    expect(result.highRiskCount).toBe(0);
++    expect(result.nodes).toEqual([]);
++  });
++
++  it('respects transfer_count weighting', async () => {
++    // 1 LOW with transfer_count=8, 1 CRITICAL with transfer_count=2
++    // weightedSum = 1*8 + 10*2 = 8 + 20 = 28
++    // totalWeight = 8 + 2 = 10
++    // score = 28 / 10 = 2.8
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum', transfer_count: 8 },
++        { address: '0xB', network: 'ethereum', transfer_count: 2 },
++      ],
++    });
++
++    getAddressRisk
++      .mockResolvedValueOnce({ risk_level: 'LOW', risk_score: 10 })
++      .mockResolvedValueOnce({ risk_level: 'CRITICAL', risk_score: 95 });
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(2.8);
++    expect(result.highRiskCount).toBe(1);
++  });
++
++  it('caps score at 10', async () => {
++    // All CRITICAL with high transfer counts - score should not exceed 10
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum', transfer_count: 5 },
++        { address: '0xB', network: 'ethereum', transfer_count: 5 },
++      ],
++    });
++
++    getAddressRisk
++      .mockResolvedValueOnce({ risk_level: 'CRITICAL', risk_score: 100 })
++      .mockResolvedValueOnce({ risk_level: 'CRITICAL', risk_score: 100 });
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    expect(result.contagionScore).toBe(10);
++  });
++
++  it('defaults transfer_count to 1 when missing', async () => {
++    getAddressConnections.mockResolvedValue({
++      connections: [
++        { address: '0xA', network: 'ethereum' }, // no transfer_count
++      ],
++    });
++
++    getAddressRisk.mockResolvedValueOnce({ risk_level: 'MEDIUM', risk_score: 50 });
++
++    const result = await calculateContagionScore(1, '0xROOT', 'ethereum');
++
++    // MEDIUM weight = 4, transfer_count defaults to 1
++    // score = 4 / 1 = 4.0
++    expect(result.contagionScore).toBe(4);
++    expect(result.nodes[0].transferCount).toBe(1);
++  });
++});
++
++describe('getContagionLabel', () => {
++  it('returns CLEAN for score < 2', () => {
++    expect(getContagionLabel(0)).toEqual({ label: 'CLEAN', color: '#3DFFA0' });
++    expect(getContagionLabel(1)).toEqual({ label: 'CLEAN', color: '#3DFFA0' });
++    expect(getContagionLabel(1.9)).toEqual({ label: 'CLEAN', color: '#3DFFA0' });
++  });
++
++  it('returns LOW RISK for score >= 2 and < 4', () => {
++    expect(getContagionLabel(2)).toEqual({ label: 'LOW RISK', color: '#3DFFA0' });
++    expect(getContagionLabel(3)).toEqual({ label: 'LOW RISK', color: '#3DFFA0' });
++    expect(getContagionLabel(3.9)).toEqual({ label: 'LOW RISK', color: '#3DFFA0' });
++  });
++
++  it('returns MODERATE for score >= 4 and < 6', () => {
++    expect(getContagionLabel(4)).toEqual({ label: 'MODERATE', color: '#F5A623' });
++    expect(getContagionLabel(5)).toEqual({ label: 'MODERATE', color: '#F5A623' });
++    expect(getContagionLabel(5.9)).toEqual({ label: 'MODERATE', color: '#F5A623' });
++  });
++
++  it('returns CONTAMINATED for score >= 6 and < 8', () => {
++    expect(getContagionLabel(6)).toEqual({ label: 'CONTAMINATED', color: '#FF3B30' });
++    expect(getContagionLabel(7)).toEqual({ label: 'CONTAMINATED', color: '#FF3B30' });
++    expect(getContagionLabel(7.9)).toEqual({ label: 'CONTAMINATED', color: '#FF3B30' });
++  });
++
++  it('returns CRITICAL for score >= 8', () => {
++    expect(getContagionLabel(8)).toEqual({ label: 'CRITICAL', color: '#FF2D55' });
++    expect(getContagionLabel(9)).toEqual({ label: 'CRITICAL', color: '#FF2D55' });
++    expect(getContagionLabel(10)).toEqual({ label: 'CRITICAL', color: '#FF2D55' });
++  });
++});

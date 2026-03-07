@@ -1,50 +1,46 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Colors, Fonts } from '../constants/theme';
 
-const LEVEL_COLORS: Record<string, string> = {
-  VERY_LOW: '#3DFFA0',
-  LOW: '#3DFFA0',
-  MEDIUM: '#F5A623',
-  HIGH: '#FF8C00',
-  CRITICAL: '#FF3B30',
+const LEVEL_META: Record<string, { color: string; label: string }> = {
+  VERY_LOW: { color: Colors.accent, label: 'VERY LOW' },
+  LOW:      { color: Colors.accent, label: 'LOW' },
+  MEDIUM:   { color: Colors.warn, label: 'MEDIUM' },
+  HIGH:     { color: Colors.danger, label: 'HIGH' },
+  CRITICAL: { color: Colors.critical, label: 'CRITICAL' },
 };
 
 interface RiskBadgeProps {
   riskLevel: string;
-  size?: 'sm' | 'md';
 }
 
-export default function RiskBadge({ riskLevel, size = 'md' }: RiskBadgeProps) {
+export default function RiskBadge({ riskLevel }: RiskBadgeProps) {
   const normalized = riskLevel.toUpperCase().replace(/[\s-]/g, '_');
-  const color = LEVEL_COLORS[normalized] || '#888888';
-  const dotSize = size === 'sm' ? 6 : 8;
-  const fontSize = size === 'sm' ? 11 : 13;
+  const meta = LEVEL_META[normalized] || { color: Colors.t2, label: riskLevel.toUpperCase() };
 
   return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.dot,
-          { width: dotSize, height: dotSize, borderRadius: dotSize / 2, backgroundColor: color },
-        ]}
-      />
-      <Text style={[styles.label, { color, fontSize }]}>
-        {riskLevel.replace(/_/g, ' ')}
+    <View style={[styles.badge, {
+      backgroundColor: meta.color + '1A',
+      borderColor: meta.color + '4D',
+    }]}>
+      <Text style={[styles.label, { color: meta.color }]}>
+        {meta.label}
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  badge: {
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 4,
+    borderWidth: 1,
   },
-  dot: {},
   label: {
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 8,
     letterSpacing: 0.5,
   },
 });

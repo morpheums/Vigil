@@ -3,12 +3,16 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import VigilLogo from '../../components/VigilLogo';
+import { Colors, Fonts } from '../../constants/theme';
 
 function HeaderTitle() {
   return (
     <View style={styles.headerTitle}>
       <VigilLogo size={28} />
-      <Text style={styles.headerText}>VIGIL</Text>
+      <View>
+        <Text style={styles.headerText}>VIGIL</Text>
+        <Text style={styles.headerSub}>BY RANGE</Text>
+      </View>
     </View>
   );
 }
@@ -17,14 +21,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3DFFA0',
+        tabBarActiveTintColor: Colors.accent,
         tabBarInactiveTintColor: '#555',
         tabBarStyle: {
-          backgroundColor: '#080808',
-          borderTopColor: '#222222',
+          backgroundColor: Colors.s1,
+          borderTopColor: Colors.border,
         },
         headerStyle: {
-          backgroundColor: '#080808',
+          backgroundColor: Colors.bg,
         },
         headerTintColor: '#fff',
         headerShadowVisible: false,
@@ -63,7 +67,7 @@ export default function TabLayout() {
           title: 'SafeSend',
           tabBarIcon: ({ color }) => (
             <SymbolView
-              name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
+              name={{ ios: 'paperplane.fill', android: 'send', web: 'send' }}
               tintColor={color}
               size={24}
             />
@@ -81,9 +85,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerText: {
-    color: '#FFFFFF',
+    color: Colors.t1,
+    fontFamily: Fonts.syneExtraBold,
     fontSize: 18,
-    fontWeight: '800',
     letterSpacing: 2,
+  },
+  headerSub: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 7,
+    color: Colors.accent,
+    letterSpacing: 2.5,
+    marginTop: -2,
   },
 });

@@ -1,38 +1,24 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
 
-import { NETWORKS } from '../../constants/networks';
+import NetworkChips from '../../components/NetworkChips';
+import { Colors, Fonts } from '../../constants/theme';
 import {
   useApi,
   type RiskCheckResult,
   type PaymentRiskResult,
 } from '../../hooks/useApi';
 
-// ── Design tokens ───────────────────────────────────────────────────────────
-const COLORS = {
-  bg: '#080808',
-  surface: '#111111',
-  surfaceAlt: '#181818',
-  accent: '#3DFFA0',
-  border: '#242424',
-  danger: '#FF3B30',
-  warning: '#F5A623',
-  text: '#FFFFFF',
-  secondary: '#888888',
-};
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 function riskEmoji(level: string): string {
   switch (level.toUpperCase()) {
@@ -41,7 +27,7 @@ function riskEmoji(level: string): string {
     case 'MEDIUM':
       return '\u{1F7E1}'; // yellow circle
     case 'HIGH':
-      return '\u{1F534}'; // red circle
+      return '\u{1F6A8}'; // siren
     case 'CRITICAL':
       return '\u{1F480}'; // skull
     default:
@@ -49,22 +35,76 @@ function riskEmoji(level: string): string {
   }
 }
 
-function verdictStyle(level: string): { bg: string; border?: string } {
+function getRiskColor(level: string): string {
   switch (level.toUpperCase()) {
     case 'LOW':
-      return { bg: '#0A3D1F' };
+      return Colors.accent;
     case 'MEDIUM':
-      return { bg: '#3D3A0A' };
+      return Colors.warn;
     case 'HIGH':
-      return { bg: '#3D0A0A' };
+      return Colors.danger;
     case 'CRITICAL':
-      return { bg: '#1A0A0A', border: COLORS.danger };
+      return Colors.critical;
     default:
-      return { bg: COLORS.surfaceAlt };
+      return Colors.t2;
   }
 }
 
-// ── Component ───────────────────────────────────────────────────────────────
+function getVerdictMessage(result: RiskCheckResult): string {
+  if (result.isSanctioned) return 'DO NOT SEND \u2014 Sanctioned address';
+  if (result.riskLevel === 'HIGH' || result.riskLevel === 'CRITICAL')
+    return 'HIGH RISK \u2014 Exercise extreme caution';
+  if (result.riskLevel === 'MEDIUM')
+    return 'MODERATE RISK \u2014 Proceed with caution';
+  return 'LOW RISK \u2014 Address appears safe';
+}
+
+function getRiskHeaderBg(level: string): string {
+  switch (level.toUpperCase()) {
+    case 'LOW':
+      return 'rgba(61,255,160,0.12)';
+    case 'MEDIUM':
+      return 'rgba(245,166,35,0.12)';
+    case 'HIGH':
+      return 'rgba(255,59,48,0.15)';
+    case 'CRITICAL':
+      return 'rgba(255,45,85,0.15)';
+    default:
+      return Colors.s2;
+  }
+}
+
+function getRiskBorderColor(level: string): string {
+  switch (level.toUpperCase()) {
+    case 'LOW':
+      return 'rgba(61,255,160,0.35)';
+    case 'MEDIUM':
+      return 'rgba(245,166,35,0.35)';
+    case 'HIGH':
+      return 'rgba(255,59,48,0.35)';
+    case 'CRITICAL':
+      return 'rgba(255,45,85,0.45)';
+    default:
+      return Colors.border;
+  }
+}
+
+function getRiskVerdictBg(level: string): string {
+  switch (level.toUpperCase()) {
+    case 'LOW':
+      return 'rgba(61,255,160,0.12)';
+    case 'MEDIUM':
+      return 'rgba(245,166,35,0.12)';
+    case 'HIGH':
+      return 'rgba(255,59,48,0.15)';
+    case 'CRITICAL':
+      return 'rgba(255,45,85,0.15)';
+    default:
+      return Colors.s2;
+  }
+}
+
+// -- Component ----------------------------------------------------------------
 
 export default function SafeSendScreen() {
   const api = useApi();
@@ -80,7 +120,9 @@ export default function SafeSendScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [riskResult, setRiskResult] = useState<RiskCheckResult | null>(null);
-  const [paymentResult, setPaymentResult] = useState<PaymentRiskResult | null>(null);
+  const [paymentResult, setPaymentResult] = useState<PaymentRiskResult | null>(
+    null,
+  );
 
   // Deep-link: pre-fill address from query param
   useEffect(() => {
@@ -152,7 +194,20 @@ export default function SafeSendScreen() {
     }
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // Derived risk styling
+  const riskColor = riskResult ? getRiskColor(riskResult.riskLevel) : Colors.t2;
+  const riskBorderColor = riskResult
+    ? getRiskBorderColor(riskResult.riskLevel)
+    : Colors.border;
+  const riskHeaderBg = riskResult
+    ? getRiskHeaderBg(riskResult.riskLevel)
+    : Colors.s2;
+  const riskVerdictBg = riskResult
+    ? getRiskVerdictBg(riskResult.riskLevel)
+    : Colors.s2;
+  const verdictMessage = riskResult ? getVerdictMessage(riskResult) : '';
+
+  // -- Render -----------------------------------------------------------------
 
   return (
     <View style={styles.container}>
@@ -161,92 +216,82 @@ export default function SafeSendScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <Text style={styles.title}>SafeSend</Text>
-        <Text style={styles.subtitle}>
-          Check any address before sending funds
-        </Text>
+        {/* Intro */}
+        <View style={styles.intro}>
+          <Text style={styles.introTitle}>Risk Check</Text>
+          <Text style={styles.introSub}>
+            Verify any address before sending funds
+          </Text>
+        </View>
 
         {/* Form */}
-        <View style={styles.card}>
+        <View style={styles.form}>
           {/* Recipient Address */}
-          <Text style={styles.label}>Recipient Address *</Text>
-          <TextInput
-            style={styles.input}
-            value={recipientAddress}
-            onChangeText={onRecipientChange}
-            placeholder="0x... or wallet address"
-            placeholderTextColor={COLORS.secondary}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          {/* Network Picker */}
-          <Text style={styles.label}>Network *</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={network}
-              onValueChange={onNetworkChange}
-              style={styles.picker}
-              dropdownIconColor={COLORS.secondary}
-            >
-              <Picker.Item
-                label="Select a network..."
-                value=""
-                color={COLORS.secondary}
-              />
-              {NETWORKS.map((n) => (
-                <Picker.Item
-                  key={n.id}
-                  label={`${n.name} (${n.symbol})`}
-                  value={n.id}
-                  color={Platform.OS === 'ios' ? COLORS.text : undefined}
-                />
-              ))}
-            </Picker>
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>RECIPIENT ADDRESS</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={recipientAddress}
+              onChangeText={onRecipientChange}
+              placeholder="0x... or wallet address"
+              placeholderTextColor={Colors.t3}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
           </View>
 
-          {/* Amount USD */}
-          <Text style={styles.label}>Amount USD (optional)</Text>
-          <TextInput
-            style={styles.input}
-            value={amountUsd}
-            onChangeText={onAmountChange}
-            placeholder="e.g. 1000"
-            placeholderTextColor={COLORS.secondary}
-            keyboardType="numeric"
-          />
+          {/* Network */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>NETWORK</Text>
+            <NetworkChips
+              layout="row"
+              selected={network}
+              onSelect={onNetworkChange}
+            />
+          </View>
 
-          {/* Sender Address */}
-          <Text style={styles.label}>My Address / Sender (optional)</Text>
-          <Text style={styles.hint}>
-            Provide your address to enable payment risk analysis
-          </Text>
-          <TextInput
-            style={styles.input}
-            value={senderAddress}
-            onChangeText={onSenderChange}
-            placeholder="Your wallet address"
-            placeholderTextColor={COLORS.secondary}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+          {/* Amount + Sender side by side */}
+          <View style={styles.fieldRow}>
+            <View style={[styles.fieldGroup, { flex: 1 }]}>
+              <Text style={styles.fieldLabel}>AMOUNT (USD)</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={amountUsd}
+                onChangeText={onAmountChange}
+                placeholder="e.g. 2,500"
+                placeholderTextColor={Colors.t3}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={[styles.fieldGroup, { flex: 1 }]}>
+              <Text style={styles.fieldLabel}>MY ADDRESS (OPT.)</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={senderAddress}
+                onChangeText={onSenderChange}
+                placeholder="0x742d...4e"
+                placeholderTextColor={Colors.t3}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+          </View>
 
-          {/* Check Risk Button */}
-          <Pressable
-            style={[
-              styles.button,
-              !canCheck && styles.buttonDisabled,
-            ]}
+          {/* Check button */}
+          <TouchableOpacity
+            style={[styles.checkBtn, (!canCheck || loading) && { opacity: 0.4 }]}
             onPress={handleCheckRisk}
             disabled={!canCheck || loading}
+            activeOpacity={0.7}
           >
             {loading ? (
-              <ActivityIndicator color={COLORS.bg} />
+              <ActivityIndicator color={Colors.t2} />
             ) : (
-              <Text style={styles.buttonText}>Check Risk</Text>
+              <Text style={styles.checkBtnText}>
+                {riskResult ? '\u2713 Checked' : 'Check Risk'}
+              </Text>
             )}
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         {/* Error */}
@@ -258,108 +303,88 @@ export default function SafeSendScreen() {
 
         {/* Risk Results */}
         {riskResult && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Risk Report</Text>
+          <View style={[styles.resultCard, { borderColor: riskBorderColor }]}>
+            {/* Header */}
+            <View
+              style={[
+                styles.resultHeader,
+                { backgroundColor: riskHeaderBg, borderBottomColor: riskBorderColor },
+              ]}
+            >
+              <View>
+                <Text style={[styles.resultRisk, { color: riskColor }]}>
+                  {riskEmoji(riskResult.riskLevel)}{' '}
+                  {riskResult.riskLevel.toUpperCase()} RISK
+                </Text>
+                <Text style={styles.resultSubtext}>Counterparty risk score</Text>
+              </View>
+              <Text style={styles.resultScore}>
+                {riskResult.riskScore} / 10
+              </Text>
+            </View>
 
-            {/* Verdict Banner */}
-            {(() => {
-              const v = verdictStyle(riskResult.riskLevel);
-              return (
-                <View
+            {/* Body rows */}
+            <View style={styles.resultBody}>
+              <View style={styles.resultRow}>
+                <Text style={styles.resultKey}>OFAC SANCTIONED</Text>
+                <Text
                   style={[
-                    styles.verdictBanner,
-                    { backgroundColor: v.bg },
-                    v.border ? { borderColor: v.border, borderWidth: 1 } : null,
+                    styles.resultVal,
+                    riskResult.isSanctioned && styles.resultValBad,
                   ]}
                 >
-                  <Text style={styles.verdictText}>
-                    {riskEmoji(riskResult.riskLevel)} {riskResult.riskLevel.toUpperCase()}
-                  </Text>
-                </View>
-              );
-            })()}
-
-            {/* Score */}
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Risk Score</Text>
-              <Text style={styles.rowValue}>{riskResult.riskScore}/10</Text>
-            </View>
-
-            {/* OFAC Sanctioned */}
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>OFAC Sanctioned</Text>
-              <Text style={styles.rowValue}>
-                {riskResult.isSanctioned ? '\u{1F6AB} SANCTIONED' : '\u{2705} Clean'}
-              </Text>
-            </View>
-
-            {/* Token Blacklisted */}
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Token Blacklisted</Text>
-              <Text style={styles.rowValue}>
-                {riskResult.isBlacklisted ? '\u{1F6AB} BLACKLISTED' : '\u{2705} Clean'}
-              </Text>
-            </View>
-
-            {/* Reasoning */}
-            <Text style={styles.reasoningLabel}>Reasoning</Text>
-            <Text style={styles.reasoningText}>{riskResult.reasoning}</Text>
-          </View>
-        )}
-
-        {/* Payment Risk Results */}
-        {paymentResult && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Payment Risk Breakdown</Text>
-
-            {/* Overall */}
-            {(() => {
-              const v = verdictStyle(paymentResult.overallRiskLevel);
-              return (
-                <View
+                  {riskResult.isSanctioned ? '\u{1F6AB} YES' : 'NO'}
+                </Text>
+              </View>
+              <View style={styles.resultRow}>
+                <Text style={styles.resultKey}>TOKEN BLACKLISTED</Text>
+                <Text
                   style={[
-                    styles.verdictBanner,
-                    { backgroundColor: v.bg },
-                    v.border ? { borderColor: v.border, borderWidth: 1 } : null,
+                    styles.resultVal,
+                    riskResult.isBlacklisted && styles.resultValBad,
                   ]}
                 >
-                  <Text style={styles.verdictText}>
-                    {riskEmoji(paymentResult.overallRiskLevel)}{' '}
-                    Overall: {paymentResult.overallRiskLevel.toUpperCase()} ({paymentResult.riskScore}/10)
-                  </Text>
-                </View>
-              );
-            })()}
+                  {riskResult.isBlacklisted ? '\u{1F6AB} YES' : 'NO'}
+                </Text>
+              </View>
 
-            {/* Sender Risk */}
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Sender Risk</Text>
-              <Text style={styles.rowValue}>
-                {riskEmoji(paymentResult.senderRisk.risk_level)}{' '}
-                {paymentResult.senderRisk.risk_level.toUpperCase()} ({paymentResult.senderRisk.risk_score}/10)
-              </Text>
+              {/* Payment risk rows (when available) */}
+              {paymentResult && (
+                <>
+                  <View style={styles.resultRow}>
+                    <Text style={styles.resultKey}>PAYMENT RISK</Text>
+                    <Text
+                      style={[
+                        styles.resultVal,
+                        (paymentResult.overallRiskLevel === 'HIGH' ||
+                          paymentResult.overallRiskLevel === 'CRITICAL') &&
+                          styles.resultValBad,
+                      ]}
+                    >
+                      {paymentResult.overallRiskLevel.toUpperCase()}
+                    </Text>
+                  </View>
+                </>
+              )}
+
+              {/* Reasoning */}
+              <Text style={styles.reasoning}>{riskResult.reasoning}</Text>
             </View>
 
-            {/* Recipient Risk */}
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Recipient Risk</Text>
-              <Text style={styles.rowValue}>
-                {riskEmoji(paymentResult.recipientRisk.risk_level)}{' '}
-                {paymentResult.recipientRisk.risk_level.toUpperCase()} ({paymentResult.recipientRisk.risk_score}/10)
+            {/* Verdict bar */}
+            <View
+              style={[
+                styles.verdict,
+                {
+                  backgroundColor: riskVerdictBg,
+                  borderTopColor: riskBorderColor,
+                },
+              ]}
+            >
+              <Text style={[styles.verdictText, { color: riskColor }]}>
+                {riskEmoji(riskResult.riskLevel)} {verdictMessage}
               </Text>
             </View>
-
-            {/* Risk Factors */}
-            {paymentResult.riskFactors.length > 0 && (
-              <>
-                <Text style={styles.reasoningLabel}>Risk Factors</Text>
-                {paymentResult.riskFactors.map((factor, i) => (
-                  <Text key={i} style={styles.factorText}>
-                    {'\u2022'} {factor}
-                  </Text>
-                ))}
-              </>
-            )}
           </View>
         )}
       </ScrollView>
@@ -367,150 +392,188 @@ export default function SafeSendScreen() {
   );
 }
 
-// ── Styles ──────────────────────────────────────────────────────────────────
+// -- Styles -------------------------------------------------------------------
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: Colors.bg,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
     paddingBottom: 60,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginTop: 16,
+
+  // Intro
+  intro: {
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.secondary,
-    marginTop: 4,
-    marginBottom: 24,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 16,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.secondary,
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  hint: {
-    fontSize: 12,
-    color: COLORS.secondary,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: COLORS.surfaceAlt,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    color: COLORS.text,
-    fontSize: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  pickerWrapper: {
-    backgroundColor: COLORS.surfaceAlt,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    overflow: 'hidden',
-  },
-  picker: {
-    color: COLORS.text,
-    height: Platform.OS === 'ios' ? 180 : 48,
-  },
-  button: {
-    backgroundColor: COLORS.accent,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.4,
-  },
-  buttonText: {
-    color: COLORS.bg,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  errorCard: {
-    backgroundColor: '#2A0A0A',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.danger,
-    padding: 14,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: COLORS.danger,
-    fontSize: 14,
-  },
-  sectionTitle: {
+  introTitle: {
+    fontFamily: Fonts.syneExtraBold,
     fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
+    color: Colors.t1,
+    marginBottom: 3,
+  },
+  introSub: {
+    fontFamily: Fonts.interRegular,
+    fontSize: 12,
+    color: Colors.t2,
+  },
+
+  // Form
+  form: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+  },
+  fieldGroup: {
     marginBottom: 12,
   },
-  verdictBanner: {
+  fieldLabel: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t2,
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  fieldInput: {
+    width: '100%',
+    backgroundColor: Colors.s2,
+    borderWidth: 1,
+    borderColor: Colors.border2,
     borderRadius: 8,
-    padding: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    color: Colors.t1,
+    fontFamily: Fonts.spaceMono,
+    fontSize: 10,
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+
+  // Check button
+  checkBtn: {
+    width: '100%',
+    backgroundColor: Colors.s2,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 10,
+    paddingVertical: 13,
     alignItems: 'center',
-    marginBottom: 16,
+    marginTop: 4,
   },
-  verdictText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: COLORS.text,
+  checkBtnText: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 14,
+    color: Colors.t2,
   },
-  row: {
+
+  // Error
+  errorCard: {
+    backgroundColor: 'rgba(255,59,48,0.08)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.danger,
+    padding: 14,
+    marginHorizontal: 18,
+    marginTop: 12,
+  },
+  errorText: {
+    fontFamily: Fonts.interRegular,
+    color: Colors.danger,
+    fontSize: 13,
+  },
+
+  // Result card
+  resultCard: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    marginHorizontal: 18,
+    marginTop: 14,
+  },
+  resultHeader: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottomWidth: 1,
+  },
+  resultRisk: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 22,
+    lineHeight: 24,
+    letterSpacing: -0.4,
+  },
+  resultSubtext: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t2,
+    marginTop: 4,
+  },
+  resultScore: {
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 13,
+    color: Colors.t2,
+  },
+
+  // Result body
+  resultBody: {
+    backgroundColor: Colors.s2,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  resultRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: Colors.border,
   },
-  rowLabel: {
-    fontSize: 14,
-    color: COLORS.secondary,
+  resultKey: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t2,
+    letterSpacing: 1,
   },
-  rowValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
+  resultVal: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.t1,
   },
-  reasoningLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.secondary,
-    marginTop: 14,
-    marginBottom: 6,
+  resultValBad: {
+    color: Colors.danger,
   },
-  reasoningText: {
-    fontSize: 14,
-    color: COLORS.text,
-    lineHeight: 20,
+  reasoning: {
+    fontFamily: Fonts.interRegular,
+    fontSize: 11,
+    color: Colors.t2,
+    lineHeight: 22,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  factorText: {
-    fontSize: 14,
-    color: COLORS.text,
-    lineHeight: 20,
-    marginBottom: 2,
+
+  // Verdict bar
+  verdict: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    borderTopWidth: 1,
+  },
+  verdictText: {
+    fontFamily: Fonts.syneExtraBold,
+    fontSize: 12,
   },
 });

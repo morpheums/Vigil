@@ -38,15 +38,6 @@ const RISK_COLORS: Record<string, string> = {
   UNKNOWN:  '#888888',
 };
 
-// ── Contagion Score Label ─────────────────────────────────────────────────────
-function getContagionMeta(score: number): { label: string; color: string } {
-  if (score < 2)  return { label: 'CLEAN',        color: '#3DFFA0' };
-  if (score < 4)  return { label: 'LOW RISK',      color: '#3DFFA0' };
-  if (score < 6)  return { label: 'MODERATE',      color: '#F5A623' };
-  if (score < 8)  return { label: 'CONTAMINATED',  color: '#FF3B30' };
-  return            { label: 'CRITICAL',          color: '#FF2D55' };
-}
-
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ContagionGraph({
   nodes,
@@ -82,38 +73,11 @@ export default function ContagionGraph({
     return base + scale * 5; // 7–12px range
   }
 
-  const { label: contagionLabel, color: contagionColor } = getContagionMeta(contagionScore);
-  const highRiskCount = nodes.filter(n => ['HIGH', 'CRITICAL'].includes(n.riskLevel)).length;
-
   const truncateAddress = (addr: string) =>
     addr.length > 10 ? addr.slice(0, 5) + '...' + addr.slice(-3) : addr;
 
   return (
     <View style={styles.container}>
-
-      {/* ── Score header ─────────────────────────────────────────────────── */}
-      <View style={styles.scoreHeader}>
-        <View>
-          <Text style={styles.scoreLabel}>CONTAGION SCORE</Text>
-          <View style={styles.scoreRow}>
-            <Text style={[styles.scoreNumber, { color: contagionColor }]}>
-              {contagionScore.toFixed(1)}
-            </Text>
-            <Text style={styles.scoreOutOf}> / 10</Text>
-          </View>
-          <Text style={styles.scoreSubtitle}>
-            {highRiskCount > 0
-              ? `${highRiskCount} of ${nodes.length} neighbors are high risk`
-              : `${nodes.length} neighbors — no risks detected`}
-          </Text>
-        </View>
-        <View style={[styles.contagionBadge, { borderColor: contagionColor + '40', backgroundColor: contagionColor + '15' }]}>
-          <Text style={[styles.contagionBadgeText, { color: contagionColor }]}>
-            {contagionLabel}
-          </Text>
-        </View>
-      </View>
-
       {/* ── SVG Graph ────────────────────────────────────────────────────── */}
       <View style={[styles.graphWrap, { width: WIDTH, height: HEIGHT }]}>
         <Svg width={WIDTH} height={HEIGHT}>
@@ -199,14 +163,14 @@ export default function ContagionGraph({
           {/* ── Root node (YOU) ── */}
           {/* Outer ring */}
           <Circle
-            cx={CX} cy={CY} r={24}
-            fill="#3DFFA015"
+            cx={CX} cy={CY} r={20}
+            fill="#3DFFA018"
             stroke="#3DFFA0"
-            strokeWidth={2}
+            strokeWidth={2.5}
           />
           {/* Inner circle */}
           <Circle
-            cx={CX} cy={CY} r={16}
+            cx={CX} cy={CY} r={12}
             fill="#0a0a0a"
             stroke="#3DFFA0"
             strokeWidth={1.5}
@@ -281,61 +245,14 @@ export default function ContagionGraph({
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#111111',
-    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#242424',
-  },
-  scoreHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
-  },
-  scoreLabel: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#444',
-    letterSpacing: 1.8,
-    marginBottom: 4,
-  },
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  scoreNumber: {
-    fontFamily: 'Syne_800ExtraBold',
-    fontSize: 36,
-    lineHeight: 40,
-  },
-  scoreOutOf: {
-    fontFamily: 'SpaceMono',
-    fontSize: 12,
-    color: '#555',
-  },
-  scoreSubtitle: {
-    fontFamily: 'SpaceMono',
-    fontSize: 9,
-    color: '#666',
-    marginTop: 3,
-  },
-  contagionBadge: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  contagionBadgeText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
   graphWrap: {
-    backgroundColor: '#0d0d0d',
+    backgroundColor: '#181818',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#242424',
+    height: 180,
   },
   tooltip: {
     margin: 12,
