@@ -49,13 +49,13 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-001.md
 
 ### TASK-002: Range MCP API helper module
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-002.md
 
 ### TASK-003: Expo mobile app scaffold with tab layout and pre-built hooks
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-003.md
@@ -119,8 +119,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** none
-- **Last Action:** Planning completed — 12 tasks across 5 waves
-- **Next Action:** Begin Wave 1 implementation (TASK-001, TASK-002, TASK-003 in parallel)
+- **Current Task:** TASK-002
+- **Last Action:** TASK-002 IMPLEMENTED — range.js + tests, all 13 tests passing
+- **Next Action:** Review TASK-002
 - **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** unknown no commits yet
+- **Last Commit:** 2757cf5
