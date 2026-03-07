@@ -1,0 +1,82 @@
+{
+  "iteration": 6,
+  "timestamp": "2026-03-07T13:05:35Z",
+  "mode": "afk",
+  "active_task": {
+    "id": null,
+    "status": null,
+    "retry_count": 0,
+    "last_action": null,
+    "next_action": null,
+    "files_modified_this_iteration": [
+      "hydra/checkpoints/iteration-000.json",
+      "hydra/config.json",
+      "hydra/plan.md",
+      "hydra/reviews/TASK-001/api-reviewer.md",
+      "hydra/reviews/TASK-001/frontend-reviewer.md",
+      "hydra/reviews/TASK-001/performance-reviewer.md",
+      "hydra/reviews/TASK-001/qa-reviewer.md",
+      "hydra/reviews/TASK-002/api-reviewer.md",
+      "hydra/reviews/TASK-002/frontend-reviewer.md",
+      "hydra/reviews/TASK-002/performance-reviewer.md",
+      "hydra/reviews/TASK-002/qa-reviewer.md",
+      "hydra/reviews/TASK-003/api-reviewer.md",
+      "hydra/reviews/TASK-003/frontend-reviewer.md",
+      "hydra/reviews/TASK-003/performance-reviewer.md",
+      "hydra/reviews/TASK-003/qa-reviewer.md",
+      "hydra/reviews/TASK-004/api-reviewer.md",
+      "hydra/reviews/TASK-004/frontend-reviewer.md",
+      "hydra/reviews/TASK-004/performance-reviewer.md",
+      "hydra/reviews/TASK-004/qa-reviewer.md",
+      "hydra/reviews/TASK-005/api-reviewer.md",
+      "hydra/reviews/TASK-005/frontend-reviewer.md",
+      "hydra/reviews/TASK-005/performance-reviewer.md",
+      "hydra/reviews/TASK-005/qa-reviewer.md",
+      "hydra/reviews/TASK-006/api-reviewer.md",
+      "hydra/reviews/TASK-006/frontend-reviewer.md",
+      "hydra/reviews/TASK-006/performance-reviewer.md",
+      "hydra/reviews/TASK-006/qa-reviewer.md",
+      "hydra/reviews/TASK-007-review.md",
+      "hydra/tasks/TASK-001.md",
+      "hydra/tasks/TASK-002.md",
+      "hydra/tasks/TASK-003.md",
+      "hydra/tasks/TASK-004.md",
+      "hydra/tasks/TASK-005.md",
+      "hydra/tasks/TASK-006.md",
+      "hydra/tasks/TASK-007.md"
+    ]
+  },
+  "plan_snapshot": {
+    "total_tasks": 12,
+    "done": 7,
+    "approved": 0,
+    "ready": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "changes_requested": 0,
+    "blocked": 0,
+    "planned": 5
+  },
+  "git": {
+    "branch": "master",
+    "last_commit_sha": "0606e18",
+    "last_commit_message": "hydra: prepare Wave 4 — promote TASK-008/009/010 to READY",
+    "uncommitted_changes": true
+  },
+  "reviewers": {
+    "active": [
+      "frontend-reviewer",
+      "api-reviewer",
+      "qa-reviewer",
+      "performance-reviewer"
+    ],
+    "last_review_task": null,
+    "last_review_verdict": null
+  },
+  "context_health": {
+    "compactions_this_session": 0,
+    "iterations_since_last_compaction": 6,
+    "consecutive_failures": 1
+  },
+  "recovery_instructions": "Read hydra/plan.md Recovery Pointer, then hydra/tasks/none.md for current state."
+}

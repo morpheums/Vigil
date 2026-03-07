@@ -12,9 +12,9 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Status Summary
 - Total tasks: 12
-- DONE: 7 | READY: 3 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 2
-- Current iteration: 5/40
-- Active task: Wave 4 (TASK-008, TASK-009, TASK-010)
+- DONE: 10 | READY: 2 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 0
+- Current iteration: 9/40
+- Active task: Wave 5 (TASK-011, TASK-012)
 
 ## Wave Groups
 
@@ -85,31 +85,31 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-007.md
 
 ### TASK-008: WalletCard, RiskBadge components + Wallets tab
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-008.md
 
 ### TASK-009: AlertItem, ActNowCard components + Alerts tab
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-009.md
 
 ### TASK-010: SafeSend tab with risk check form
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-010.md
 
 ### TASK-011: ContagionGraph integration + Wallet Detail modal
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 5
 - **Depends on**: TASK-008
 - **Manifest**: hydra/tasks/TASK-011.md
 
 ### TASK-012: Push notifications + error/loading states
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 5
 - **Depends on**: TASK-008, TASK-009, TASK-010
 - **Manifest**: hydra/tasks/TASK-012.md
@@ -122,12 +122,15 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - [x] TASK-005: Alerts module with Act Now actions -> DONE
 - [x] TASK-006: Polling loop -> DONE
 - [x] TASK-007: Express server with all REST routes -> DONE
+- [x] TASK-008: WalletCard, RiskBadge + Wallets tab -> DONE
+- [x] TASK-009: AlertItem, ActNowCard + Alerts tab -> DONE
+- [x] TASK-010: SafeSend tab with risk check form -> DONE
 
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** Wave 4 (TASK-008, TASK-009, TASK-010)
-- **Last Action:** TASK-007 reviewed and merged to master
-- **Next Action:** Launch Wave 4 parallel implementation
-- **Last Checkpoint:** TASK-007 DONE, Wave 4 promoted to READY
-- **Last Commit:** pending merge commit
+- **Current Task:** Wave 5 (TASK-011, TASK-012)
+- **Last Action:** Wave 4 reviewed and merged — all mobile screens complete
+- **Next Action:** Launch Wave 5 parallel implementation (TASK-011, TASK-012)
+- **Last Checkpoint:** Wave 4 DONE, Wave 5 promoted to READY
+- **Last Commit:** pending Wave 4 merge commit

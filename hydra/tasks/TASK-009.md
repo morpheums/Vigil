@@ -1,7 +1,7 @@
 # TASK-009: AlertItem, ActNowCard components + Alerts tab
 
 - **ID**: TASK-009
-- **Status**: PLANNED
+- **Status**: DONE
 - **Group**: 4
 - **Wave**: 4
 - **Depends on**: TASK-003, TASK-007

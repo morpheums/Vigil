@@ -1,7 +1,7 @@
 # TASK-010: SafeSend tab with risk check form
 
 - **ID**: TASK-010
-- **Status**: PLANNED
+- **Status**: DONE
 - **Group**: 4
 - **Wave**: 4
 - **Depends on**: TASK-003, TASK-007

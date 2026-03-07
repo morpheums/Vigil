@@ -1,0 +1,46 @@
+{
+  "iteration": 8,
+  "timestamp": "2026-03-07T13:05:53Z",
+  "mode": "afk",
+  "active_task": {
+    "id": "TASK-008",
+    "status": "READY",
+    "retry_count": 0,
+    "last_action": null,
+    "next_action": "Read hydra/tasks/TASK-008.md and continue work",
+    "files_modified_this_iteration": []
+  },
+  "plan_snapshot": {
+    "total_tasks": 12,
+    "done": 7,
+    "approved": 0,
+    "ready": 3,
+    "in_progress": 0,
+    "in_review": 0,
+    "changes_requested": 0,
+    "blocked": 0,
+    "planned": 2
+  },
+  "git": {
+    "branch": "master",
+    "last_commit_sha": "0606e18",
+    "last_commit_message": "hydra: prepare Wave 4 — promote TASK-008/009/010 to READY",
+    "uncommitted_changes": true
+  },
+  "reviewers": {
+    "active": [
+      "frontend-reviewer",
+      "api-reviewer",
+      "qa-reviewer",
+      "performance-reviewer"
+    ],
+    "last_review_task": null,
+    "last_review_verdict": null
+  },
+  "context_health": {
+    "compactions_this_session": 0,
+    "iterations_since_last_compaction": 8,
+    "consecutive_failures": 3
+  },
+  "recovery_instructions": "Read hydra/plan.md Recovery Pointer, then hydra/tasks/TASK-008.md for current state."
+}

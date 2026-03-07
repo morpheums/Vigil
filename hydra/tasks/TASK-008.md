@@ -1,7 +1,7 @@
 # TASK-008: WalletCard, RiskBadge components + Wallets tab
 
 - **ID**: TASK-008
-- **Status**: PLANNED
+- **Status**: DONE
 - **Group**: 4
 - **Wave**: 4
 - **Depends on**: TASK-003, TASK-007
