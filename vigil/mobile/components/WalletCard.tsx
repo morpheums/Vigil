@@ -4,6 +4,7 @@ import { Wallet } from '../hooks/useApi';
 import { NETWORK_MAP } from '../constants/networks';
 import { Colors, Fonts, Radii } from '../constants/theme';
 import RiskBadge from './RiskBadge';
+import NetworkLogo from './NetworkLogo';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -76,7 +77,8 @@ export default function WalletCard({ wallet, onPress, isActive = false }: Wallet
 
       {/* Row 1: wcard-top */}
       <View style={styles.topRow}>
-        <View style={styles.topLeft}>
+        <NetworkLogo networkId={wallet.network} size={28} />
+        <View style={styles.topMiddle}>
           <View style={styles.labelRow}>
             {isActive && <PulsingDot />}
             <Text style={styles.walletName} numberOfLines={1}>
@@ -190,11 +192,11 @@ const styles = StyleSheet.create({
   // Row 1 — top
   topRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 10,
     marginBottom: 10,
   },
-  topLeft: {
+  topMiddle: {
     flex: 1,
     marginRight: 8,
   },

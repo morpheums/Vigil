@@ -18,7 +18,7 @@
     }
   ],
   "max_iterations": 40,
-  "current_iteration": 28,
+  "current_iteration": 36,
   "paused": false,
   "completion_promise": "HYDRA_COMPLETE",
   "task_file": "hydra/plan.md",
@@ -112,7 +112,7 @@
     "block_destructive_commands": true,
     "require_tests_pass_before_review": true,
     "max_consecutive_failures": 5,
-    "consecutive_failures": 25,
+    "consecutive_failures": 33,
     "_prev_done_count": 0
   },
   "afk": {

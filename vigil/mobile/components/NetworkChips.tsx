@@ -36,8 +36,8 @@ export default function NetworkChips({
               activeOpacity={0.7}
             >
               <NetworkLogo networkId={n.id} size={24} />
-              <Text style={[styles.gridSymbol, { color: n.color }]}>{n.symbol}</Text>
-              <Text style={styles.gridName}>{n.name}</Text>
+              <Text style={[styles.gridSymbol, { color: isSelected ? n.color : Colors.t1 }]}>{n.symbol}</Text>
+              <Text style={[styles.gridName, isSelected && { color: n.color }]}>{n.name}</Text>
             </TouchableOpacity>
           );
         })}

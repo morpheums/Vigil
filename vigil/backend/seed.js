@@ -5,11 +5,11 @@ require('dotenv').config();
 const db = require('./db');
 
 const DEMO_WALLETS = [
-  { address: '6AwuGoRLd54NTjAWeYZBVHnK4reK78FYpsqe6Z2PvU27', network: 'solana', label: 'Binance Deposit (SOL)' },
-  { address: '0x08723392ed15743cc38513c4925f5e6be5c17243', network: 'ethereum', label: 'Lazarus Group (ETH)' },
+  { address: '6AwuGoRLd54NTjAWeYZBVHnK4reK78FYpsqe6Z2PvU27', network: 'solana', label: 'Binance Deposit' },
+  { address: '0x08723392ed15743cc38513c4925f5e6be5c17243', network: 'ethereum', label: 'Lazarus Group' },
   { address: 'TXJgMdjVX5dKiQaUi9QobwNxtSQaFqccvd', network: 'tron', label: 'Clean Tron Wallet' },
   { address: 'cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn', network: 'cosmoshub-4', label: 'Clean Cosmos' },
-  { address: 'TBHTJqAy4DhHhmT3dNceJYNRz4SdLofLre', network: 'tron', label: 'OFAC Sanctioned (Tron)' },
+  { address: 'TBHTJqAy4DhHhmT3dNceJYNRz4SdLofLre', network: 'tron', label: 'OFAC Sanctioned' },
 ];
 
 console.log('Seeding Vigil database with demo wallets...');
