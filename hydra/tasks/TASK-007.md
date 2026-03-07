@@ -1,7 +1,7 @@
 # TASK-007: Express server with all REST routes
 
 - **ID**: TASK-007
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Base SHA**: 0c2b72be3763ef3caf1a4bc5511382945ee2b529
 - **claimed_at**: 2026-03-07
 - **Group**: 3
