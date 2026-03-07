@@ -13,12 +13,14 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { useApi, Alert } from '../../hooks/useApi';
+import { useRouter } from 'expo-router';
+import { useApi, Alert, ActNowAction } from '../../hooks/useApi';
 import AlertItem from '../../components/AlertItem';
 import ActNowCard from '../../components/ActNowCard';
 
 export default function AlertsScreen() {
   const api = useApi();
+  const router = useRouter();
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +77,16 @@ export default function AlertsScreen() {
     setActNowVisible(false);
     setActNowAlert(null);
   };
+
+  const handleActionPress = useCallback((action: ActNowAction): boolean => {
+    if (action.id === 'safesend_check' && action.counterparty) {
+      // Close the modal, then navigate to SafeSend with the address pre-filled
+      handleCloseActNow();
+      router.push(`/safesend?address=${action.counterparty}`);
+      return true; // handled — skip default Linking behavior
+    }
+    return false;
+  }, [router]);
 
   const handleAcknowledge = async (alertId: number) => {
     try {
@@ -163,6 +175,7 @@ export default function AlertsScreen() {
         visible={actNowVisible}
         onClose={handleCloseActNow}
         onAcknowledge={handleAcknowledge}
+        onActionPress={handleActionPress}
       />
     </View>
   );

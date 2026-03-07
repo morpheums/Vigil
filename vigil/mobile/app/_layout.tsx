@@ -3,7 +3,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
-import { useEffect } from 'react';
+import * as Device from 'expo-device';
+import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
 export {
@@ -29,6 +31,47 @@ Notifications.setNotificationHandler({
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+// Module-level push token so other screens can import it
+export let expoPushToken: string | null = null;
+
+async function registerForPushNotificationsAsync(): Promise<string | null> {
+  try {
+    if (!Device.isDevice) {
+      console.warn('Push notifications require a physical device');
+      return null;
+    }
+
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      console.warn('Push notification permission not granted');
+      return null;
+    }
+
+    // Android requires a notification channel
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#3DFFA0',
+      });
+    }
+
+    const tokenData = await Notifications.getExpoPushTokenAsync();
+    return tokenData.data;
+  } catch (error) {
+    console.warn('Failed to register for push notifications:', error);
+    return null;
+  }
+}
+
 // Custom dark theme with Vigil branding
 const VigilDarkTheme = {
   ...DarkTheme,
@@ -47,6 +90,9 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -56,6 +102,34 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // ── Push notification registration ──────────────────────────────────────
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        expoPushToken = token;
+      }
+    });
+
+    // Listen for incoming notifications while app is foregrounded
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        // Notification received in foreground — handler config above controls display
+      }
+    );
+
+    // Listen for user tapping on a notification
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        // Could navigate based on notification data in the future
+      }
+    );
+
+    return () => {
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
+    };
+  }, []);
 
   if (!loaded) {
     return null;

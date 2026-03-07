@@ -14,12 +14,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
 import { useApi, Wallet } from '../../hooks/useApi';
 import { NETWORKS } from '../../constants/networks';
 import WalletCard from '../../components/WalletCard';
 
 export default function WalletsScreen() {
   const api = useApi();
+  const router = useRouter();
 
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,7 +98,12 @@ export default function WalletsScreen() {
       <FlatList
         data={wallets}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <WalletCard wallet={item} />}
+        renderItem={({ item }) => (
+          <WalletCard
+            wallet={item}
+            onPress={() => router.push(`/wallet-detail?walletId=${item.id}`)}
+          />
+        )}
         contentContainerStyle={wallets.length === 0 ? styles.emptyContainer : styles.listContent}
         refreshing={refreshing}
         onRefresh={onRefresh}

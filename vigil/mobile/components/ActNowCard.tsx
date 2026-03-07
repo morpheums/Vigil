@@ -24,6 +24,8 @@ interface ActNowCardProps {
   visible: boolean;
   onClose: () => void;
   onAcknowledge: (alertId: number) => void;
+  /** Optional callback when an action is pressed. Return true to prevent default Linking behavior. */
+  onActionPress?: (action: ActNowAction) => boolean;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -50,12 +52,17 @@ function truncateTxHash(hash: string): string {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function ActNowCard({ alert, visible, onClose, onAcknowledge }: ActNowCardProps) {
+export default function ActNowCard({ alert, visible, onClose, onAcknowledge, onActionPress }: ActNowCardProps) {
   if (!alert) return null;
 
   const { label: riskLabel, color: riskColor } = getRiskMeta(alert.risk_level);
 
   const handleActionPress = async (action: ActNowAction) => {
+    // Let parent handle the action first; if it returns true, skip default behavior
+    if (onActionPress && onActionPress(action)) {
+      return;
+    }
+
     const target = action.url || action.deeplink;
     if (target) {
       try {
@@ -118,7 +125,7 @@ export default function ActNowCard({ alert, visible, onClose, onAcknowledge }: A
                 <Text style={styles.sectionTitle}>RECOMMENDED ACTIONS</Text>
                 {alert.act_now_actions.map((action, index) => {
                   const urgencyColor = getUrgencyColor(action.urgency);
-                  const hasLink = !!(action.url || action.deeplink);
+                  const hasLink = !!(action.url || action.deeplink || onActionPress);
 
                   return (
                     <TouchableOpacity
