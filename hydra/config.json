@@ -1,0 +1,167 @@
+{
+  "schema_version": 2,
+  "install_mode": "shared",
+  "mode": "afk",
+  "objective": "Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQLite, Range MCP API integration, contagion score engine, Act Now alerts, and Expo React Native mobile app with Wallets, Alerts, and SafeSend tabs — as specified in VIGIL_SPEC.md",
+  "objective_set_at": "2026-03-07T12:34:37Z",
+  "project_spec": null,
+  "objectives_history": [
+    {
+      "objective": "Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQLite, Range MCP API integration, contagion score engine, Act Now alerts, and Expo React Native mobile app with Wallets, Alerts, and SafeSend tabs — as specified in VIGIL_SPEC.md",
+      "started_at": "2026-03-07T12:34:37Z"
+    }
+  ],
+  "max_iterations": 40,
+  "current_iteration": 0,
+  "paused": false,
+  "completion_promise": "HYDRA_COMPLETE",
+  "task_file": "hydra/plan.md",
+  "log_dir": "hydra/logs",
+  "review_dir": "hydra/reviews",
+  "project": {
+    "language": "javascript/typescript",
+    "framework": "express+expo",
+    "test_command": "npm test",
+    "build_command": "npm start",
+    "lint_command": null,
+    "classification": "greenfield",
+    "classification_confidence": 95,
+    "classified_at": "2026-03-07",
+    "stack": {
+      "runtime": "node",
+      "package_manager": "npm",
+      "framework": "express+expo",
+      "database": "sqlite",
+      "orm": null,
+      "testing": "jest",
+      "styling": "react-native-stylesheet",
+      "auth": null,
+      "additional": [
+        "range-mcp-api",
+        "expo-push",
+        "resend-email",
+        "react-native-svg"
+      ]
+    },
+    "infrastructure": {
+      "hosting_model": null,
+      "cloud_provider": null,
+      "cloud_region": null,
+      "iac_tool": "terraform",
+      "container_orchestration": null,
+      "cicd_platform": null,
+      "observability": null,
+      "secret_management": null,
+      "environments": [
+        "dev",
+        "prod"
+      ]
+    },
+    "tools_verified": false,
+    "tools_installed": []
+  },
+  "discovery": {
+    "last_run": "2026-03-07",
+    "files_scanned": 13,
+    "context_dir": "hydra/context",
+    "existing_docs_count": 6,
+    "existing_docs_quality": "excellent"
+  },
+  "agents": {
+    "pipeline": [
+      "discovery",
+      "doc-generator",
+      "planner",
+      "implementer",
+      "feedback-aggregator",
+      "team-orchestrator"
+    ],
+    "reviewers": [
+      "frontend-reviewer",
+      "api-reviewer",
+      "qa-reviewer",
+      "performance-reviewer"
+    ],
+    "specialists": [],
+    "post_loop": [],
+    "disabled": [],
+    "custom": []
+  },
+  "documents": {
+    "required": [],
+    "generated": [],
+    "approved": [],
+    "existing": [],
+    "dir": "hydra/docs"
+  },
+  "review_gate": {
+    "require_all_approve": true,
+    "max_retries_per_task": 3,
+    "current_task_retries": 0,
+    "auto_approve_concerns": true,
+    "block_on_security_reject": true,
+    "confidence_threshold": 80
+  },
+  "safety": {
+    "block_destructive_commands": true,
+    "require_tests_pass_before_review": true,
+    "max_consecutive_failures": 5,
+    "consecutive_failures": 0,
+    "_prev_done_count": 0
+  },
+  "afk": {
+    "enabled": true,
+    "yolo": true,
+    "timeout_minutes": 90,
+    "checkpoint_every_n_iterations": 5,
+    "auto_commit": true,
+    "commit_prefix": "hydra:",
+    "branch_per_task": true,
+    "last_task_branch": null
+  },
+  "context": {
+    "budget_strategy": "aggressive",
+    "compact_threshold_pct": 70,
+    "compact_custom_instructions": "Preserve: current task ID and status, list of all modified files this iteration, active reviewer verdicts, any blocking issues. Discard: file contents already written to disk, previous iteration details, exploratory reads.",
+    "max_file_read_lines": 200,
+    "use_subagents_for_exploration": true,
+    "checkpoint_state_before_compact": true
+  },
+  "parallelism": {
+    "enabled": true,
+    "use_agent_teams": true,
+    "parallel_reviews": true,
+    "parallel_independent_tasks": true,
+    "wave_execution": true,
+    "max_parallel_teammates": 4,
+    "require_settings": "enableAgentTeams"
+  },
+  "models": {
+    "planning": "opus",
+    "discovery": "opus",
+    "docs": "opus",
+    "review": "opus",
+    "implementation": "sonnet",
+    "specialists": "sonnet",
+    "post_loop": "sonnet",
+    "default": "sonnet"
+  },
+  "notifications": {
+    "enabled": false,
+    "notify_on": [
+      "task_complete",
+      "blocked",
+      "loop_complete",
+      "security_rejection"
+    ],
+    "notify_file": "hydra/notifications.jsonl"
+  },
+  "board": {
+    "enabled": false,
+    "provider": null,
+    "provider_config": {},
+    "task_map": {},
+    "last_sync": null,
+    "sync_failures": 0
+  }
+}

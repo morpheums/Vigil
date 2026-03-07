@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "range": {
+      "type": "http",
+      "url": "https://api.range.org/ai/mcp",
+      "headers": {
+        "Authorization": "Bearer cmmg9uf3r000sp601yslix2ho.Cr788lXn2fXTjGptnSsNJT4HQWwbpX5d"
+      }
+    }
+  }
+}

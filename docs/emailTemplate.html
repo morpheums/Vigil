@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vigil Alert</title>
+</head>
+<!--
+  VIGIL — Alert Email Template
+  ─────────────────────────────────────────────────────────────────────
+  Usage in alerts.js:
+
+  import { buildAlertEmail } from './emailTemplate.js';
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL,
+    to: wallet.alert_email,
+    subject: buildSubject(wallet, tx, riskInfo),
+    html: buildAlertEmail(wallet, tx, riskInfo, actNowActions),
+  });
+
+  function buildSubject(wallet, tx, riskInfo) {
+    const urgency = ['HIGH','CRITICAL'].includes(riskInfo.risk_level) ? '🚨' : '⚠️';
+    const label = wallet.label || wallet.address.slice(0,8) + '...';
+    return `${urgency} Vigil: ${riskInfo.risk_level} risk on ${label}`;
+  }
+  ─────────────────────────────────────────────────────────────────────
+  Template variables (replace with real values at send time):
+    {{RISK_LEVEL}}        → "HIGH", "MEDIUM", "LOW", "CRITICAL"
+    {{RISK_COLOR}}        → hex color based on risk level
+    {{RISK_SCORE}}        → "8.2"
+    {{DIRECTION}}         → "OUTGOING" or "INCOMING"
+    {{DIRECTION_ARROW}}   → "↑" or "↓"
+    {{AMOUNT}}            → "$2,500.00"
+    {{TOKEN}}             → "USDC"
+    {{NETWORK}}           → "Ethereum"
+    {{WALLET_LABEL}}      → "Main Wallet" or truncated address
+    {{COUNTERPARTY}}      → "0x7f26...38E5"
+    {{TX_HASH}}           → "0xabc123...def"
+    {{OFAC_STATUS}}       → "⚠️ SANCTIONED" or "✅ Clear"
+    {{BLACKLIST_STATUS}}  → "⚠️ Blacklisted" or "✅ Clear"
+    {{OFAC_COLOR}}        → "#FF3B30" or "#3DFFA0"
+    {{BLACKLIST_COLOR}}   → "#FF3B30" or "#3DFFA0"
+    {{ACTIONS_HTML}}      → rendered action items (see buildActionsHtml)
+    {{TIMESTAMP}}         → "Jan 15, 2025 at 10:32 AM UTC"
+  ─────────────────────────────────────────────────────────────────────
+-->
+<body style="margin:0;padding:0;background:#050505;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#050505;padding:32px 16px;">
+<tr><td align="center">
+<table width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;">
+
+  <!-- ── HEADER ── -->
+  <tr>
+    <td style="padding-bottom:24px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <!-- Logo mark (inline SVG as background fallback) -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#3DFFA0;border-radius:8px;width:32px;height:32px;text-align:center;vertical-align:middle;">
+                  <span style="font-size:16px;font-weight:900;color:#080808;line-height:32px;">V</span>
+                </td>
+                <td style="padding-left:10px;vertical-align:middle;">
+                  <div style="font-size:18px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;line-height:1;">VIGIL</div>
+                  <div style="font-size:8px;color:#3DFFA0;letter-spacing:0.18em;font-family:monospace;margin-top:2px;">BY RANGE</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td align="right" style="vertical-align:middle;">
+            <span style="font-family:monospace;font-size:9px;color:#333;letter-spacing:0.12em;">SECURITY ALERT</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── RISK HERO CARD ── -->
+  <tr>
+    <td style="padding-bottom:16px;">
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="background:#111111;border:1px solid {{RISK_COLOR}}40;border-radius:14px;overflow:hidden;">
+
+        <!-- Risk level banner -->
+        <tr>
+          <td style="background:{{RISK_COLOR}}18;padding:18px 24px;border-bottom:1px solid {{RISK_COLOR}}30;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <div style="font-size:24px;font-weight:900;color:{{RISK_COLOR}};letter-spacing:-0.02em;">
+                    {{EMOJI}} {{RISK_LEVEL}} RISK
+                  </div>
+                  <div style="font-size:12px;color:#888888;margin-top:6px;">
+                    {{DIRECTION_ARROW}} {{DIRECTION}} · {{WALLET_LABEL}}
+                  </div>
+                </td>
+                <td align="right" style="vertical-align:top;">
+                  <div style="font-family:monospace;font-size:22px;font-weight:700;color:{{RISK_COLOR}};">
+                    {{RISK_SCORE}}
+                  </div>
+                  <div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:0.08em;">
+                    / 10
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Transaction details -->
+        <tr>
+          <td style="padding:18px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+
+              <tr>
+                <td style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;padding:5px 0;border-bottom:1px solid #1e1e1e;">AMOUNT</td>
+                <td align="right" style="font-family:monospace;font-size:11px;color:#ffffff;font-weight:700;padding:5px 0;border-bottom:1px solid #1e1e1e;">{{AMOUNT}} {{TOKEN}}</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;padding:5px 0;border-bottom:1px solid #1e1e1e;">NETWORK</td>
+                <td align="right" style="font-family:monospace;font-size:11px;color:#ffffff;padding:5px 0;border-bottom:1px solid #1e1e1e;">{{NETWORK}}</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;padding:5px 0;border-bottom:1px solid #1e1e1e;">COUNTERPARTY</td>
+                <td align="right" style="font-family:monospace;font-size:11px;color:#ffffff;padding:5px 0;border-bottom:1px solid #1e1e1e;">{{COUNTERPARTY}}</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;padding:5px 0;border-bottom:1px solid #1e1e1e;">OFAC SANCTIONED</td>
+                <td align="right" style="font-family:monospace;font-size:11px;color:{{OFAC_COLOR}};font-weight:700;padding:5px 0;border-bottom:1px solid #1e1e1e;">{{OFAC_STATUS}}</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;padding:5px 0;">TOKEN BLACKLISTED</td>
+                <td align="right" style="font-family:monospace;font-size:11px;color:{{BLACKLIST_COLOR}};font-weight:700;padding:5px 0;">{{BLACKLIST_STATUS}}</td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+
+        <!-- TX hash footer -->
+        <tr>
+          <td style="background:#0d0d0d;padding:10px 24px;border-top:1px solid #1a1a1a;">
+            <span style="font-family:monospace;font-size:9px;color:#333;letter-spacing:0.06em;">TX: {{TX_HASH}}</span>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── ACT NOW ACTIONS (only rendered for HIGH/CRITICAL) ── -->
+  <!-- {{ACTIONS_SECTION_START}} — remove this block for LOW/MEDIUM alerts -->
+  <tr>
+    <td style="padding-bottom:16px;">
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="background:#111111;border:1px solid #242424;border-radius:14px;overflow:hidden;">
+        <tr>
+          <td style="padding:14px 24px 10px;">
+            <span style="font-family:monospace;font-size:9px;color:#444;letter-spacing:0.2em;">RECOMMENDED ACTIONS</span>
+          </td>
+        </tr>
+
+        <!-- Action 1 — Critical -->
+        <tr>
+          <td style="padding:0 24px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0"
+              style="background:#FF3B3010;border:1px solid #FF3B3025;border-radius:10px;margin-bottom:8px;">
+              <tr>
+                <td style="padding:12px 14px;">
+                  <div style="font-size:13px;font-weight:700;color:#ffffff;margin-bottom:4px;">
+                    🔒 Revoke token approvals
+                  </div>
+                  <div style="font-size:11px;color:#888;line-height:1.5;margin-bottom:6px;">
+                    Open revoke.cash to remove any unlimited approvals on this wallet immediately.
+                  </div>
+                  <a href="https://revoke.cash" style="font-family:monospace;font-size:9px;color:#3DFFA0;text-decoration:none;letter-spacing:0.06em;">
+                    revoke.cash →
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Action 2 — Critical -->
+        <tr>
+          <td style="padding:0 24px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0"
+              style="background:#FF3B3010;border:1px solid #FF3B3025;border-radius:10px;margin-bottom:8px;">
+              <tr>
+                <td style="padding:12px 14px;">
+                  <div style="font-size:13px;font-weight:700;color:#ffffff;margin-bottom:4px;">
+                    🛑 Do not interact further
+                  </div>
+                  <div style="font-size:11px;color:#888;line-height:1.5;">
+                    This address is OFAC sanctioned. Do not send funds back or acknowledge this transaction.
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Action 3 — Medium -->
+        <tr>
+          <td style="padding:0 24px 14px;">
+            <table width="100%" cellpadding="0" cellspacing="0"
+              style="background:#3DFFA008;border:1px solid #3DFFA020;border-radius:10px;">
+              <tr>
+                <td style="padding:12px 14px;">
+                  <div style="font-size:13px;font-weight:700;color:#ffffff;margin-bottom:4px;">
+                    📋 Document this transaction
+                  </div>
+                  <div style="font-size:11px;color:#888;line-height:1.5;">
+                    Save the transaction hash and counterparty address for any future compliance needs.
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+  <!-- {{ACTIONS_SECTION_END}} -->
+
+  <!-- ── CTA BUTTON ── -->
+  <tr>
+    <td style="padding-bottom:24px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <a href="vigil://alerts"
+              style="display:inline-block;background:#3DFFA0;color:#000000;font-size:13px;font-weight:900;
+                     padding:13px 32px;border-radius:10px;text-decoration:none;letter-spacing:0.02em;">
+              Open Vigil → View Full Details
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── FOOTER ── -->
+  <tr>
+    <td style="border-top:1px solid #1a1a1a;padding-top:20px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-family:monospace;font-size:9px;color:#2a2a2a;letter-spacing:0.1em;">
+            VIGIL BY RANGE<br/>
+            Enterprise-grade blockchain intelligence for everyone<br/>
+            <span style="color:#1e1e1e;">{{TIMESTAMP}}</span>
+          </td>
+          <td align="right" style="vertical-align:top;">
+            <span style="font-family:monospace;font-size:8px;color:#1e1e1e;">
+              To unsubscribe, remove your email<br/>in the Vigil app settings.
+            </span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  JAVASCRIPT BUILDER FUNCTION — paste into backend/alerts.js
+  ════════════════════════════════════════════════════════════════
+
+  import fs from 'fs';
+  const EMAIL_TEMPLATE = fs.readFileSync('./emailTemplate.html', 'utf8');
+
+  function buildAlertEmail(wallet, tx, riskInfo, actNowActions) {
+    const isUrgent = ['HIGH', 'CRITICAL'].includes(riskInfo.risk_level);
+
+    const riskColors = {
+      VERY_LOW: '#3DFFA0', LOW: '#3DFFA0',
+      MEDIUM: '#F5A623', HIGH: '#FF3B30', CRITICAL: '#FF2D55'
+    };
+    const riskEmojis = {
+      VERY_LOW: '✅', LOW: '✅', MEDIUM: '⚠️', HIGH: '🚨', CRITICAL: '🚨'
+    };
+
+    const riskColor = riskColors[riskInfo.risk_level] || '#888888';
+    const direction = tx.direction === 'outgoing' ? 'OUTGOING' : 'INCOMING';
+    const arrow = tx.direction === 'outgoing' ? '↑' : '↓';
+    const amount = tx.amount_usd ? `$${tx.amount_usd.toFixed(2)}` : '—';
+    const counterparty = tx.counterparty
+      ? tx.counterparty.slice(0, 8) + '...' + tx.counterparty.slice(-4)
+      : 'Unknown';
+    const txHash = tx.tx_hash
+      ? tx.tx_hash.slice(0, 12) + '...' + tx.tx_hash.slice(-6)
+      : 'Unknown';
+    const timestamp = new Date().toUTCString();
+
+    let html = EMAIL_TEMPLATE
+      .replace(/{{RISK_LEVEL}}/g,       riskInfo.risk_level)
+      .replace(/{{RISK_COLOR}}/g,       riskColor)
+      .replace(/{{RISK_SCORE}}/g,       riskInfo.risk_score?.toFixed(1) || '—')
+      .replace(/{{EMOJI}}/g,            riskEmojis[riskInfo.risk_level] || '⚠️')
+      .replace(/{{DIRECTION}}/g,        direction)
+      .replace(/{{DIRECTION_ARROW}}/g,  arrow)
+      .replace(/{{AMOUNT}}/g,           amount)
+      .replace(/{{TOKEN}}/g,            tx.token_symbol || '')
+      .replace(/{{NETWORK}}/g,          tx.network || '')
+      .replace(/{{WALLET_LABEL}}/g,     wallet.label || wallet.address.slice(0,8) + '...')
+      .replace(/{{COUNTERPARTY}}/g,     counterparty)
+      .replace(/{{TX_HASH}}/g,          txHash)
+      .replace(/{{OFAC_STATUS}}/g,      riskInfo.is_ofac_sanctioned ? '🚫 YES' : '✅ Clear')
+      .replace(/{{OFAC_COLOR}}/g,       riskInfo.is_ofac_sanctioned ? '#FF3B30' : '#3DFFA0')
+      .replace(/{{BLACKLIST_STATUS}}/g, riskInfo.is_token_blacklisted ? '🚫 YES' : '✅ Clear')
+      .replace(/{{BLACKLIST_COLOR}}/g,  riskInfo.is_token_blacklisted ? '#FF3B30' : '#3DFFA0')
+      .replace(/{{TIMESTAMP}}/g,        timestamp);
+
+    // Remove Act Now section for low-risk alerts
+    if (!isUrgent) {
+      html = html.replace(
+        /<!-- {{ACTIONS_SECTION_START}} -->[\s\S]*?<!-- {{ACTIONS_SECTION_END}} -->/,
+        ''
+      );
+    }
+
+    return html;
+  }
+
+  function buildSubject(wallet, tx, riskInfo) {
+    const prefix = ['HIGH','CRITICAL'].includes(riskInfo.risk_level) ? '🚨' : '⚠️';
+    const label = wallet.label || wallet.address.slice(0,8) + '...';
+    const dir = tx.direction === 'outgoing' ? 'Outgoing' : 'Incoming';
+    const amount = tx.amount_usd ? ` $${tx.amount_usd.toFixed(0)}` : '';
+    return `${prefix} ${riskInfo.risk_level} Risk —${amount} ${tx.token_symbol || ''} ${dir} on ${label}`;
+  }
+
+  export { buildAlertEmail, buildSubject };
+-->

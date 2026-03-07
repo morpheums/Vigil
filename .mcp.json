@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hydra-notifications": {
+      "command": "node",
+      "args": ["/Users/josemejia/Documents/Software Development/ai-hydra-framework/mcp-server/dist/index.js"]
+    }
+  }
+}

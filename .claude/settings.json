@@ -1,0 +1,8 @@
+{
+  "enableAgentTeams": true,
+  "permissions": {
+    "allow": [
+      "mcp__hydra-notifications__*"
+    ]
+  }
+}

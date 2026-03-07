@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vigil — Screen Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────────── */
+  :root {
+    --bg:        #080808;
+    --s1:        #111111;
+    --s2:        #181818;
+    --s3:        #202020;
+    --border:    #242424;
+    --border2:   #2e2e2e;
+    --accent:    #3DFFA0;
+    --accent-10: rgba(61,255,160,0.10);
+    --accent-20: rgba(61,255,160,0.20);
+    --accent-35: rgba(61,255,160,0.35);
+    --warn:      #F5A623;
+    --warn-10:   rgba(245,166,35,0.10);
+    --danger:    #FF3B30;
+    --danger-10: rgba(255,59,48,0.10);
+    --danger-30: rgba(255,59,48,0.30);
+    --crit:      #FF2D55;
+    --t1:        #FFFFFF;
+    --t2:        #888888;
+    --t3:        #444444;
+    --t4:        #2a2a2a;
+    --eth:       #627EEA;
+    --sol:       #9945FF;
+    --trx:       #FF4040;
+    --atom:      #6B75CA;
+    --xlm:       #0099CC;
+    --r: 390px; /* phone width */
+  }
+
+  /* ── RESET ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #050505;
+    font-family: 'Inter', sans-serif;
+    color: var(--t1);
+    min-height: 100vh;
+  }
+
+  /* ── PAGE LAYOUT ────────────────────────────────────────── */
+  .page-header {
+    padding: 40px 48px 24px;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .page-header-logo { display: flex; align-items: center; gap: 10px; }
+  .page-header-logo .name {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 22px; letter-spacing: -0.02em;
+  }
+  .page-header-logo .by {
+    font-family: 'Space Mono', monospace; font-size: 8px;
+    color: var(--accent); letter-spacing: 0.18em;
+  }
+  .page-header-divider { width: 1px; height: 28px; background: var(--border); margin: 0 12px; }
+  .page-header-desc {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: var(--t3); letter-spacing: 0.12em;
+  }
+
+  .screens-label {
+    padding: 32px 48px 16px;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: var(--t3); letter-spacing: 0.2em;
+  }
+
+  .screens-row {
+    display: flex;
+    gap: 28px;
+    padding: 0 48px 64px;
+    overflow-x: auto;
+    align-items: flex-start;
+  }
+
+  /* ── PHONE SHELL ────────────────────────────────────────── */
+  .phone {
+    flex-shrink: 0;
+    width: var(--r);
+    background: #0e0e0e;
+    border: 1px solid #2a2a2a;
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px #333 inset,
+      0 40px 100px rgba(0,0,0,0.7),
+      0 0 60px rgba(61,255,160,0.04);
+    display: flex; flex-direction: column;
+  }
+  .phone-notch {
+    height: 34px; display: flex;
+    align-items: center; justify-content: center;
+    padding-top: 8px;
+  }
+  .phone-notch-bar {
+    width: 120px; height: 5px;
+    background: #1e1e1e; border-radius: 10px;
+  }
+  .phone-screen {
+    flex: 1;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    min-height: 780px;
+  }
+  .phone-home-bar {
+    height: 28px; display: flex;
+    align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .phone-home-bar-line {
+    width: 120px; height: 4px;
+    background: #222; border-radius: 10px;
+  }
+
+  .screen-label {
+    text-align: center;
+    margin-top: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--t3);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── SHARED COMPONENTS ──────────────────────────────────── */
+  .status-bar {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 6px 20px;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: var(--t2);
+  }
+
+  .app-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .app-header-title {
+    display: flex; align-items: center; gap: 9px;
+  }
+  .wordmark {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 18px; letter-spacing: -0.02em; line-height: 1;
+  }
+  .by-range {
+    font-family: 'Space Mono', monospace; font-size: 7px;
+    color: var(--accent); letter-spacing: 0.15em;
+    margin-top: 2px;
+  }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%; background: var(--accent);
+    position: relative; flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .pulse-dot::before {
+    content: ''; position: absolute; inset: -3px;
+    border-radius: 50%; background: var(--accent);
+    opacity: 0.3; animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes pulse-ring { 0%{transform:scale(1);opacity:0.6} 100%{transform:scale(2.5);opacity:0} }
+
+  .tab-bar {
+    display: flex; border-top: 1px solid var(--border);
+    background: var(--s1); padding: 6px 0 2px;
+    margin-top: auto;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; padding: 6px 0;
+    cursor: pointer;
+  }
+  .tab-icon { font-size: 18px; }
+  .tab-label {
+    font-family: 'Space Mono', monospace; font-size: 8px;
+    color: var(--t3); letter-spacing: 0.08em;
+  }
+  .tab-item.active .tab-label { color: var(--accent); }
+  .tab-item.active .tab-icon { filter: drop-shadow(0 0 6px var(--accent)); }
+
+  /* badges */
+  .badge-risk {
+    display: inline-block;
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 8px; letter-spacing: 0.1em;
+    border-radius: 4px; padding: 2px 7px;
+    border: 1px solid;
+  }
+  .badge-net {
+    display: inline-block;
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 8px; letter-spacing: 0.08em;
+    border-radius: 4px; padding: 2px 7px;
+    border: 1px solid;
+  }
+  .r-low    { color: var(--accent); background: var(--accent-10); border-color: rgba(61,255,160,0.3); }
+  .r-medium { color: var(--warn);   background: var(--warn-10);   border-color: rgba(245,166,35,0.3); }
+  .r-high   { color: var(--danger); background: var(--danger-10); border-color: rgba(255,59,48,0.3); }
+  .r-crit   { color: var(--crit);   background: rgba(255,45,85,0.10); border-color: rgba(255,45,85,0.3); }
+  .n-eth    { color: var(--eth); background: rgba(98,126,234,0.10); border-color: rgba(98,126,234,0.3); }
+  .n-sol    { color: var(--sol); background: rgba(153,69,255,0.10); border-color: rgba(153,69,255,0.3); }
+  .n-trx    { color: var(--trx); background: rgba(255,64,64,0.10); border-color: rgba(255,64,64,0.3); }
+  .n-atom   { color: var(--atom); background: rgba(107,117,202,0.10); border-color: rgba(107,117,202,0.3); }
+  .n-xlm    { color: var(--xlm); background: rgba(0,153,204,0.10); border-color: rgba(0,153,204,0.3); }
+
+  .mono { font-family: 'Space Mono', monospace; }
+  .syne { font-family: 'Syne', sans-serif; }
+  .divider { height: 1px; background: var(--border); }
+
+  /* scroll area */
+  .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* ── SCREEN 1: WALLETS ──────────────────────────────────── */
+  .btn-add {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #000;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 12px; border-radius: 8px;
+    padding: 7px 14px; cursor: pointer;
+    border: none;
+  }
+
+  .wallet-card {
+    margin: 0 14px 10px;
+    background: var(--s2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px;
+    position: relative; overflow: hidden;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .wallet-card.active { border-color: rgba(61,255,160,0.25); }
+  .wallet-card.active::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .wallet-card-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 10px;
+  }
+  .wallet-label {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 13px; color: var(--t1);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 6px;
+  }
+  .wallet-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .wallet-balance {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 15px; color: var(--t1); text-align: right;
+  }
+  .wallet-activity {
+    font-size: 10px; color: var(--t2); text-align: right;
+    margin-top: 2px;
+  }
+  .wallet-address {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t3); margin-bottom: 10px;
+  }
+
+  /* contagion pill */
+  .contagion-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--s3); border-radius: 8px;
+    padding: 6px 10px; border: 1px solid var(--border2);
+  }
+  .contagion-score-num {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 12px;
+  }
+  .contagion-label {
+    font-family: 'Space Mono', monospace; font-size: 8px;
+    color: var(--t2); letter-spacing: 0.06em;
+    flex: 1;
+  }
+  .contagion-bar-wrap {
+    width: 60px; height: 3px;
+    background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .contagion-bar { height: 100%; border-radius: 2px; }
+  .section-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px 8px;
+  }
+  .section-header-label {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t3); letter-spacing: 0.18em;
+  }
+  .section-header-count {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); background: var(--s2);
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  /* ── SCREEN 2: WALLET DETAIL + CONTAGION ─────────────────── */
+  .back-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 18px 6px;
+  }
+  .back-btn {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: var(--accent); background: none; border: none;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+  }
+
+  .detail-header {
+    padding: 6px 18px 14px; border-bottom: 1px solid var(--border);
+  }
+  .detail-address {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t3); margin: 4px 0 8px;
+    word-break: break-all;
+  }
+  .detail-stats {
+    display: flex; gap: 10px;
+  }
+  .detail-stat {
+    flex: 1; background: var(--s2); border-radius: 10px;
+    padding: 10px; border: 1px solid var(--border);
+  }
+  .detail-stat-val {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 14px; color: var(--t1); margin-bottom: 2px;
+  }
+  .detail-stat-key {
+    font-family: 'Space Mono', monospace; font-size: 8px;
+    color: var(--t3); letter-spacing: 0.1em;
+  }
+
+  /* contagion graph */
+  .contagion-section {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .contagion-title-row {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 10px;
+  }
+  .contagion-score-big {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 32px; line-height: 1;
+  }
+  .contagion-sub {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); margin-top: 3px;
+  }
+  .contagion-graph-wrap {
+    background: var(--s2); border-radius: 14px;
+    border: 1px solid var(--border);
+    height: 180px; position: relative; overflow: hidden;
+  }
+  /* SVG graph inside */
+  .graph-svg { width: 100%; height: 100%; }
+
+  /* recent txns */
+  .tx-list { padding: 0 18px; }
+  .tx-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .tx-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 12px; color: var(--t1); margin-bottom: 3px;
+  }
+  .tx-meta { display: flex; gap: 5px; align-items: center; }
+  .tx-amount {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 12px; text-align: right;
+  }
+  .tx-time {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); text-align: right; margin-top: 2px;
+  }
+
+  /* ── SCREEN 3: ALERTS ───────────────────────────────────── */
+  .alerts-header-badge {
+    background: var(--danger); color: #fff;
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 9px; border-radius: 20px; padding: 2px 7px;
+  }
+
+  .alert-card {
+    margin: 0 14px 10px;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .alert-card.urgent {
+    border-color: rgba(255,59,48,0.35);
+    box-shadow: 0 0 20px rgba(255,59,48,0.06);
+  }
+  .act-now-banner {
+    background: linear-gradient(90deg, rgba(255,59,48,0.18), rgba(255,45,85,0.10));
+    padding: 7px 14px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid rgba(255,59,48,0.2);
+  }
+  .act-now-text {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 11px; color: var(--danger); letter-spacing: 0.05em;
+  }
+  .act-now-actions-preview {
+    padding: 8px 14px 10px;
+    background: var(--s2);
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .act-now-action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 10px; background: rgba(255,59,48,0.06);
+    border: 1px solid rgba(255,59,48,0.12); border-radius: 8px;
+  }
+  .act-now-action-label {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 11px; color: var(--t1);
+  }
+  .act-now-action-arrow {
+    font-size: 10px; color: var(--danger);
+  }
+  .alert-card-body {
+    background: var(--s2); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .alert-dir-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .alert-info { flex: 1; min-width: 0; }
+  .alert-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 12px; color: var(--t1); margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .new-pill {
+    font-family: 'Space Mono', monospace; font-size: 7px;
+    color: var(--accent); background: var(--accent-10);
+    border: 1px solid rgba(61,255,160,0.3); border-radius: 3px;
+    padding: 1px 5px; letter-spacing: 0.1em;
+  }
+  .alert-badges { display: flex; gap: 5px; }
+  .alert-time {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); flex-shrink: 0;
+  }
+
+  /* normal alert */
+  .alert-card.normal .alert-card-body { background: var(--s2); }
+
+  /* ── SCREEN 4: ACT NOW MODAL ────────────────────────────── */
+  .modal-overlay {
+    background: var(--bg); flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border2); border-radius: 4px;
+    margin: 10px auto 14px;
+  }
+  .modal-risk-header {
+    padding: 0 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-risk-indicator {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 12px;
+  }
+  .risk-icon-big {
+    width: 52px; height: 52px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+    background: rgba(255,59,48,0.12);
+    border: 1px solid rgba(255,59,48,0.25);
+  }
+  .risk-label-big {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 26px; color: var(--danger); line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .risk-score-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 4px;
+  }
+  .risk-score-bar-wrap {
+    flex: 1; height: 4px; background: var(--border); border-radius: 2px;
+  }
+  .risk-score-bar {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--warn), var(--danger));
+    width: 82%;
+  }
+  .risk-score-num {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: var(--danger); font-weight: 700;
+  }
+  .tx-summary-box {
+    background: var(--s2); border-radius: 10px;
+    border: 1px solid var(--border); padding: 10px 12px;
+  }
+  .tx-summary-row {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 4px;
+  }
+  .tx-summary-row:last-child { margin-bottom: 0; }
+  .tx-summary-key {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); letter-spacing: 0.08em;
+  }
+  .tx-summary-val {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t1); font-weight: 700;
+  }
+
+  .actions-section {
+    padding: 14px 20px; flex: 1; overflow-y: auto;
+  }
+  .actions-title {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t3); letter-spacing: 0.18em; margin-bottom: 10px;
+  }
+  .action-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px; border-radius: 12px; margin-bottom: 8px;
+    border: 1px solid; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-item.critical {
+    background: rgba(255,59,48,0.06);
+    border-color: rgba(255,59,48,0.2);
+  }
+  .action-item.high {
+    background: rgba(245,166,35,0.06);
+    border-color: rgba(245,166,35,0.2);
+  }
+  .action-item.medium {
+    background: rgba(61,255,160,0.04);
+    border-color: rgba(61,255,160,0.15);
+  }
+  .action-num {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 11px; width: 20px; flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .action-item.critical .action-num { color: var(--danger); }
+  .action-item.high .action-num { color: var(--warn); }
+  .action-item.medium .action-num { color: var(--accent); }
+  .action-content { flex: 1; }
+  .action-label {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 12px; color: var(--t1); margin-bottom: 3px;
+  }
+  .action-desc {
+    font-size: 11px; color: var(--t2); line-height: 1.5;
+  }
+  .action-arrow { font-size: 12px; color: var(--t3); padding-top: 2px; }
+
+  .modal-handled-btn {
+    margin: 0 20px 16px;
+    padding: 13px; border-radius: 10px;
+    background: var(--s2); border: 1px solid var(--border);
+    color: var(--t2); font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    text-align: center;
+  }
+
+  /* ── SCREEN 5: SAFESEND ─────────────────────────────────── */
+  .safesend-intro {
+    padding: 12px 18px 16px; border-bottom: 1px solid var(--border);
+  }
+  .safesend-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 18px; color: var(--t1); margin-bottom: 3px;
+  }
+  .safesend-subtitle {
+    font-size: 12px; color: var(--t2);
+  }
+
+  .form-section { padding: 14px 18px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); letter-spacing: 0.12em; margin-bottom: 6px;
+    display: block;
+  }
+  .form-input {
+    width: 100%; background: var(--s2);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--t1);
+    font-family: 'Space Mono', monospace; font-size: 10px;
+  }
+  .form-input.filled { border-color: var(--border2); color: var(--t1); }
+  .form-input.empty { color: var(--t3); }
+  .form-row { display: flex; gap: 8px; }
+  .form-row .form-group { flex: 1; }
+
+  .network-select {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .net-chip {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    font-weight: 700; padding: 5px 10px; border-radius: 6px;
+    cursor: pointer; border: 1px solid;
+    transition: all 0.15s;
+  }
+  .net-chip.selected-eth { color: var(--eth); background: rgba(98,126,234,0.15); border-color: rgba(98,126,234,0.4); }
+  .net-chip.unsel { color: var(--t3); background: transparent; border-color: var(--border); }
+
+  .check-btn {
+    width: 100%; padding: 13px;
+    background: var(--accent); border: none;
+    border-radius: 10px; color: #000;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 14px; cursor: pointer; margin-top: 4px;
+  }
+
+  .result-card {
+    margin: 0 18px; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255,59,48,0.35);
+    box-shadow: 0 0 30px rgba(255,59,48,0.08);
+  }
+  .result-header {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,45,85,0.08));
+    border-bottom: 1px solid rgba(255,59,48,0.2);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .result-risk-label {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 22px; color: var(--danger); line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .result-score {
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 13px; color: var(--t2);
+  }
+  .result-body { background: var(--s2); padding: 12px 16px; }
+  .result-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-key {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    color: var(--t2); letter-spacing: 0.08em;
+  }
+  .result-val-bad {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    font-weight: 700; color: var(--danger);
+  }
+  .result-val-ok {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    font-weight: 700; color: var(--accent);
+  }
+  .result-reasoning {
+    font-size: 11px; color: var(--t2); line-height: 1.5;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .verdict-banner {
+    padding: 10px 14px; text-align: center;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 12px; background: rgba(255,59,48,0.15);
+    color: var(--danger); border-top: 1px solid rgba(255,59,48,0.2);
+  }
+
+  /* ── LOGO MARK SVG ──────────────────────────────────────── */
+  .logo-svg { flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-logo">
+    <svg class="logo-svg" width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#3DFFA0"/>
+      <path d="M16 6L8 9.5V17C8 21.4 11.4 25.5 16 27C20.6 25.5 24 21.4 24 17V9.5L16 6Z" fill="#080808"/>
+      <circle cx="16" cy="17" r="3" fill="#3DFFA0"/>
+      <circle cx="16" cy="17" r="1.4" fill="#080808"/>
+    </svg>
+    <div>
+      <div class="page-header-logo name">VIGIL</div>
+      <div class="page-header-logo by" style="font-family:'Space Mono',monospace;font-size:7px;color:#3DFFA0;letter-spacing:0.15em;">BY RANGE</div>
+    </div>
+  </div>
+  <div class="page-header-divider"></div>
+  <div class="page-header-desc">SCREEN MOCKUPS · ALL 5 VIEWS · HANDOFF TO CLAUDE CODE</div>
+</div>
+
+<div class="screens-label">SCREENS — 01 WALLETS &nbsp; 02 CONTAGION DETAIL &nbsp; 03 ALERTS &nbsp; 04 ACT NOW &nbsp; 05 SAFESEND</div>
+
+<div class="screens-row">
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║  SCREEN 1 — WALLETS TAB     ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+      <div class="phone-screen">
+        <!-- status bar -->
+        <div class="status-bar">
+          <span>9:41</span>
+          <span>●●●●  WiFi  🔋</span>
+        </div>
+        <!-- app header -->
+        <div class="app-header">
+          <div class="app-header-title">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#3DFFA0"/>
+              <path d="M16 6L8 9.5V17C8 21.4 11.4 25.5 16 27C20.6 25.5 24 21.4 24 17V9.5L16 6Z" fill="#080808"/>
+              <circle cx="16" cy="17" r="3" fill="#3DFFA0"/>
+              <circle cx="16" cy="17" r="1.4" fill="#080808"/>
+            </svg>
+            <div>
+              <div class="wordmark">VIGIL</div>
+              <div class="by-range">BY RANGE</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pulse-dot"></div>
+            <button class="btn-add">+ Add</button>
+          </div>
+        </div>
+
+        <div class="scroll-area" style="padding-top:10px;">
+          <div class="section-header-row">
+            <span class="section-header-label">WATCHING</span>
+            <span class="section-header-count">3 wallets</span>
+          </div>
+
+          <!-- Wallet 1 — active, has contagion warning -->
+          <div class="wallet-card active">
+            <div class="wallet-card-top">
+              <div>
+                <div class="wallet-label">
+                  <div class="pulse-dot" style="width:6px;height:6px;"></div>
+                  Main Wallet
+                </div>
+                <div class="wallet-badges">
+                  <span class="badge-net n-eth">ETH</span>
+                  <span class="badge-risk r-low">LOW</span>
+                </div>
+              </div>
+              <div>
+                <div class="wallet-balance">$12,400</div>
+                <div class="wallet-activity">2 min ago</div>
+              </div>
+            </div>
+            <div class="wallet-address">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</div>
+            <!-- Contagion pill -->
+            <div class="contagion-pill">
+              <span style="font-size:11px;">🕸</span>
+              <span class="contagion-score-num" style="color:#F5A623;">5.8</span>
+              <span class="contagion-label">CONTAGION · 2 risky neighbors</span>
+              <div class="contagion-bar-wrap">
+                <div class="contagion-bar" style="width:58%;background:#F5A623;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wallet 2 -->
+          <div class="wallet-card">
+            <div class="wallet-card-top">
+              <div>
+                <div class="wallet-label">DeFi Fund</div>
+                <div class="wallet-badges">
+                  <span class="badge-net n-sol">SOL</span>
+                  <span class="badge-risk r-medium">MEDIUM</span>
+                </div>
+              </div>
+              <div>
+                <div class="wallet-balance">$3,820</div>
+                <div class="wallet-activity">18 min ago</div>
+              </div>
+            </div>
+            <div class="wallet-address">7xKp9RmNq2jWbTdF3Hv8...mLpQ</div>
+            <div class="contagion-pill">
+              <span style="font-size:11px;">🕸</span>
+              <span class="contagion-score-num" style="color:#3DFFA0;">1.9</span>
+              <span class="contagion-label">CONTAGION · Clean neighborhood</span>
+              <div class="contagion-bar-wrap">
+                <div class="contagion-bar" style="width:19%;background:#3DFFA0;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wallet 3 -->
+          <div class="wallet-card">
+            <div class="wallet-card-top">
+              <div>
+                <div class="wallet-label">Cold Storage</div>
+                <div class="wallet-badges">
+                  <span class="badge-net n-trx">TRX</span>
+                  <span class="badge-risk r-low">VERY LOW</span>
+                </div>
+              </div>
+              <div>
+                <div class="wallet-balance">$48,200</div>
+                <div class="wallet-activity">3 days ago</div>
+              </div>
+            </div>
+            <div class="wallet-address">T9yLmK3VbxrPq7...nXw2</div>
+            <div class="contagion-pill">
+              <span style="font-size:11px;">🕸</span>
+              <span class="contagion-score-num" style="color:#3DFFA0;">0.4</span>
+              <span class="contagion-label">CONTAGION · No risks detected</span>
+              <div class="contagion-bar-wrap">
+                <div class="contagion-bar" style="width:4%;background:#3DFFA0;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:6px;"></div>
+        </div><!-- /scroll -->
+
+        <!-- tab bar -->
+        <div class="tab-bar">
+          <div class="tab-item active"><span class="tab-icon">🛡</span><span class="tab-label">WALLETS</span></div>
+          <div class="tab-item"><span class="tab-icon">🔔</span><span class="tab-label">ALERTS</span></div>
+          <div class="tab-item"><span class="tab-icon">✈️</span><span class="tab-label">SAFESEND</span></div>
+        </div>
+      </div>
+      <div class="phone-home-bar"><div class="phone-home-bar-line"></div></div>
+    </div>
+    <div class="screen-label">01 — WALLETS TAB</div>
+  </div>
+
+
+  <!-- ╔══════════════════════════════════╗ -->
+  <!-- ║  SCREEN 2 — CONTAGION DETAIL    ║ -->
+  <!-- ╚══════════════════════════════════╝ -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+
+        <div class="back-row">
+          <button class="back-btn">← Back</button>
+        </div>
+
+        <div class="detail-header">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span class="syne" style="font-weight:800;font-size:16px;">Main Wallet</span>
+            <span class="badge-net n-eth">ETH</span>
+            <span class="badge-risk r-low">LOW</span>
+          </div>
+          <div class="detail-address">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</div>
+          <div class="detail-stats">
+            <div class="detail-stat">
+              <div class="detail-stat-val">$12,400</div>
+              <div class="detail-stat-key">BALANCE</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-val" style="color:#F5A623;">5.8</div>
+              <div class="detail-stat-key">CONTAGION</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-val">2 min</div>
+              <div class="detail-stat-key">LAST TX</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contagion-section">
+          <div class="contagion-title-row">
+            <div>
+              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.18em;margin-bottom:4px;">CONTAGION SCORE</div>
+              <div style="display:flex;align-items:baseline;gap:6px;">
+                <span class="contagion-score-big" style="color:#F5A623;">5.8</span>
+                <span class="mono" style="font-size:11px;color:var(--t2);">/ 10</span>
+              </div>
+              <div class="contagion-sub">2 of 9 neighbors are high risk</div>
+            </div>
+            <button style="background:var(--accent-10);border:1px solid rgba(61,255,160,0.2);border-radius:8px;padding:6px 12px;color:var(--accent);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:0.08em;">REFRESH</button>
+          </div>
+
+          <!-- SVG Contagion Graph -->
+          <div class="contagion-graph-wrap">
+            <svg viewBox="0 0 356 180" class="graph-svg" xmlns="http://www.w3.org/2000/svg">
+              <!-- dark bg grid hint -->
+              <defs>
+                <radialGradient id="glow-center" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#3DFFA0" stop-opacity="0.08"/>
+                  <stop offset="100%" stop-color="#3DFFA0" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="178" cy="90" rx="70" ry="70" fill="url(#glow-center)"/>
+
+              <!-- edges to nodes -->
+              <!-- LOW nodes (green) -->
+              <line x1="178" y1="90" x2="178" y2="22"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+              <line x1="178" y1="90" x2="118" y2="38"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+              <line x1="178" y1="90" x2="68"  y2="75"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+              <line x1="178" y1="90" x2="75"  y2="138" stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+              <line x1="178" y1="90" x2="134" y2="162" stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+              <!-- MEDIUM nodes (yellow) -->
+              <line x1="178" y1="90" x2="238" y2="162" stroke="#F5A623" stroke-width="1.5" stroke-opacity="0.4"/>
+              <line x1="178" y1="90" x2="290" y2="130" stroke="#F5A623" stroke-width="1.5" stroke-opacity="0.4"/>
+              <!-- HIGH nodes (red) -->
+              <line x1="178" y1="90" x2="288" y2="50"  stroke="#FF3B30" stroke-width="2"   stroke-opacity="0.5"/>
+              <line x1="178" y1="90" x2="238" y2="22"  stroke="#FF3B30" stroke-width="2"   stroke-opacity="0.5"/>
+
+              <!-- counterparty nodes -->
+              <!-- LOW (green) -->
+              <circle cx="178" cy="22"  r="9"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+              <circle cx="118" cy="38"  r="8"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+              <circle cx="68"  cy="75"  r="7"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+              <circle cx="75"  cy="138" r="9"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+              <circle cx="134" cy="162" r="8"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+              <!-- MEDIUM (yellow) -->
+              <circle cx="238" cy="162" r="9"  fill="#F5A62320" stroke="#F5A623" stroke-width="1.5"/>
+              <circle cx="290" cy="130" r="10" fill="#F5A62320" stroke="#F5A623" stroke-width="1.5"/>
+              <!-- HIGH (red) — slightly larger -->
+              <circle cx="288" cy="50"  r="12" fill="#FF3B3025" stroke="#FF3B30" stroke-width="2"/>
+              <text x="288" y="55" text-anchor="middle" font-family="Space Mono" font-size="7" fill="#FF3B30">!</text>
+              <circle cx="238" cy="22"  r="11" fill="#FF3B3025" stroke="#FF3B30" stroke-width="2"/>
+              <text x="238" y="27" text-anchor="middle" font-family="Space Mono" font-size="7" fill="#FF3B30">!</text>
+
+              <!-- ROOT node -->
+              <circle cx="178" cy="90" r="20" fill="#3DFFA018" stroke="#3DFFA0" stroke-width="2.5"/>
+              <circle cx="178" cy="90" r="12" fill="#0a0a0a" stroke="#3DFFA0" stroke-width="1.5"/>
+              <text x="178" y="95" text-anchor="middle" font-family="Space Mono" font-size="9" font-weight="700" fill="#3DFFA0">YOU</text>
+
+              <!-- legend -->
+              <circle cx="16" cy="162" r="5" fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.2"/>
+              <text x="25" y="166" font-family="Space Mono" font-size="8" fill="#888">SAFE</text>
+              <circle cx="62" cy="162" r="5" fill="#F5A62320" stroke="#F5A623" stroke-width="1.2"/>
+              <text x="71" y="166" font-family="Space Mono" font-size="8" fill="#888">MED</text>
+              <circle cx="108" cy="162" r="5" fill="#FF3B3025" stroke="#FF3B30" stroke-width="1.2"/>
+              <text x="117" y="166" font-family="Space Mono" font-size="8" fill="#888">HIGH</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- recent transactions -->
+        <div style="padding:10px 18px 4px;">
+          <div class="section-header-label">RECENT TRANSACTIONS</div>
+        </div>
+        <div class="tx-list" style="flex:1;overflow-y:auto;">
+          <div class="tx-item">
+            <div class="tx-icon" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);">↑</div>
+            <div class="tx-info">
+              <div class="tx-title">Sent USDC</div>
+              <div class="tx-meta"><span class="badge-risk r-high">HIGH</span><span class="badge-net n-eth">ETH</span></div>
+            </div>
+            <div>
+              <div class="tx-amount" style="color:var(--danger);">-$2,500</div>
+              <div class="tx-time">2m ago</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:rgba(61,255,160,0.08);border:1px solid rgba(61,255,160,0.15);">↓</div>
+            <div class="tx-info">
+              <div class="tx-title">Received USDT</div>
+              <div class="tx-meta"><span class="badge-risk r-medium">MEDIUM</span><span class="badge-net n-eth">ETH</span></div>
+            </div>
+            <div>
+              <div class="tx-amount" style="color:var(--accent);">+$800</div>
+              <div class="tx-time">1h ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item active"><span class="tab-icon">🛡</span><span class="tab-label">WALLETS</span></div>
+          <div class="tab-item"><span class="tab-icon">🔔</span><span class="tab-label">ALERTS</span></div>
+          <div class="tab-item"><span class="tab-icon">✈️</span><span class="tab-label">SAFESEND</span></div>
+        </div>
+      </div>
+      <div class="phone-home-bar"><div class="phone-home-bar-line"></div></div>
+    </div>
+    <div class="screen-label">02 — CONTAGION DETAIL</div>
+  </div>
+
+
+  <!-- ╔════════════════════════════╗ -->
+  <!-- ║  SCREEN 3 — ALERTS TAB   ║ -->
+  <!-- ╚════════════════════════════╝ -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+        <div class="app-header">
+          <div class="app-header-title">
+            <span class="wordmark">Alerts</span>
+          </div>
+          <span class="alerts-header-badge">3 new</span>
+        </div>
+
+        <div class="scroll-area" style="padding-top:10px;">
+          <div class="section-header-row">
+            <span class="section-header-label">TODAY</span>
+          </div>
+
+          <!-- ACT NOW alert — HIGH risk outgoing -->
+          <div class="alert-card urgent">
+            <div class="act-now-banner">
+              <span style="font-size:14px;">⚡</span>
+              <span class="act-now-text">ACT NOW</span>
+              <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--t2);margin-left:auto;">2m ago</span>
+            </div>
+            <div class="alert-card-body" style="border-bottom:1px solid rgba(255,59,48,0.15);">
+              <div class="alert-dir-icon" style="background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.25);">↑</div>
+              <div class="alert-info">
+                <div class="alert-title">
+                  Sent 2,500 USDC
+                  <span class="new-pill">NEW</span>
+                </div>
+                <div class="alert-badges">
+                  <span class="badge-net n-eth">ETH</span>
+                  <span class="badge-risk r-high">HIGH</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-now-actions-preview">
+              <div class="act-now-action-row">
+                <span class="act-now-action-label">🔒 Revoke token approvals</span>
+                <span class="act-now-action-arrow">→</span>
+              </div>
+              <div class="act-now-action-row">
+                <span class="act-now-action-label">🔍 Check in SafeSend</span>
+                <span class="act-now-action-arrow">→</span>
+              </div>
+              <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--t3);text-align:center;padding-top:2px;cursor:pointer;">
+                + 2 more actions · tap to open
+              </div>
+            </div>
+          </div>
+
+          <!-- ACT NOW alert — CRITICAL incoming -->
+          <div class="alert-card urgent" style="border-color:rgba(255,45,85,0.4);">
+            <div class="act-now-banner" style="background:linear-gradient(90deg,rgba(255,45,85,0.18),rgba(255,45,85,0.08));">
+              <span style="font-size:14px;">🚨</span>
+              <span class="act-now-text" style="color:var(--crit);">ACT NOW — SANCTIONED</span>
+              <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--t2);margin-left:auto;">14m ago</span>
+            </div>
+            <div class="alert-card-body">
+              <div class="alert-dir-icon" style="background:rgba(255,45,85,0.12);border:1px solid rgba(255,45,85,0.25);">↓</div>
+              <div class="alert-info">
+                <div class="alert-title" style="color:var(--t1);">Received 100 USDT</div>
+                <div class="alert-badges">
+                  <span class="badge-net n-eth">ETH</span>
+                  <span class="badge-risk r-crit">CRITICAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Normal alert — LOW -->
+          <div class="alert-card normal">
+            <div class="alert-card-body">
+              <div class="alert-dir-icon" style="background:rgba(61,255,160,0.08);border:1px solid rgba(61,255,160,0.15);">↓</div>
+              <div class="alert-info">
+                <div class="alert-title">Received 18,000 USDC</div>
+                <div class="alert-badges">
+                  <span class="badge-net n-sol">SOL</span>
+                  <span class="badge-risk r-low">LOW</span>
+                </div>
+              </div>
+              <div class="alert-time">1h ago</div>
+            </div>
+          </div>
+
+          <!-- Normal alert — MEDIUM -->
+          <div class="alert-card normal">
+            <div class="alert-card-body">
+              <div class="alert-dir-icon" style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.15);">↑</div>
+              <div class="alert-info">
+                <div class="alert-title">Sent 500 USDT</div>
+                <div class="alert-badges">
+                  <span class="badge-net n-trx">TRX</span>
+                  <span class="badge-risk r-medium">MEDIUM</span>
+                </div>
+              </div>
+              <div class="alert-time">2h ago</div>
+            </div>
+          </div>
+          <div style="height:8px;"></div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item"><span class="tab-icon">🛡</span><span class="tab-label">WALLETS</span></div>
+          <div class="tab-item active"><span class="tab-icon">🔔</span><span class="tab-label">ALERTS</span></div>
+          <div class="tab-item"><span class="tab-icon">✈️</span><span class="tab-label">SAFESEND</span></div>
+        </div>
+      </div>
+      <div class="phone-home-bar"><div class="phone-home-bar-line"></div></div>
+    </div>
+    <div class="screen-label">03 — ALERTS TAB</div>
+  </div>
+
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║  SCREEN 4 — ACT NOW MODAL  ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+
+        <div class="modal-overlay">
+          <div class="modal-handle"></div>
+
+          <div class="modal-risk-header">
+            <div class="modal-risk-indicator">
+              <div class="risk-icon-big">🚨</div>
+              <div>
+                <div class="risk-label-big">HIGH RISK</div>
+                <div class="risk-score-row">
+                  <div class="risk-score-bar-wrap"><div class="risk-score-bar"></div></div>
+                  <span class="risk-score-num">8.2 / 10</span>
+                </div>
+              </div>
+            </div>
+            <!-- tx summary -->
+            <div class="tx-summary-box">
+              <div class="tx-summary-row">
+                <span class="tx-summary-key">DIRECTION</span>
+                <span class="tx-summary-val" style="color:var(--danger);">↑ OUTGOING</span>
+              </div>
+              <div class="tx-summary-row">
+                <span class="tx-summary-key">AMOUNT</span>
+                <span class="tx-summary-val">2,500 USDC</span>
+              </div>
+              <div class="tx-summary-row">
+                <span class="tx-summary-key">NETWORK</span>
+                <span class="tx-summary-val">Ethereum</span>
+              </div>
+              <div class="tx-summary-row">
+                <span class="tx-summary-key">TO</span>
+                <span class="tx-summary-val">0x7f26...38E5</span>
+              </div>
+              <div class="tx-summary-row" style="border:none;">
+                <span class="tx-summary-key">OFAC</span>
+                <span class="tx-summary-val" style="color:var(--danger);">⚠ SANCTIONED</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-section">
+            <div class="actions-title">RECOMMENDED ACTIONS</div>
+
+            <div class="action-item critical">
+              <div class="action-num">01</div>
+              <div class="action-content">
+                <div class="action-label">🔒 Revoke token approvals</div>
+                <div class="action-desc">Open revoke.cash to remove unlimited approvals on this wallet immediately.</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action-item critical">
+              <div class="action-num">02</div>
+              <div class="action-content">
+                <div class="action-label">🛑 Do not interact further</div>
+                <div class="action-desc">This address is OFAC sanctioned. Do not send funds back or reply.</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action-item high">
+              <div class="action-num">03</div>
+              <div class="action-content">
+                <div class="action-label">🏃 Move clean funds out</div>
+                <div class="action-desc">Transfer remaining balance to a different wallet before further use.</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action-item medium">
+              <div class="action-num">04</div>
+              <div class="action-content">
+                <div class="action-label">🔍 SafeSend check</div>
+                <div class="action-desc">Run full risk report on 0x7f26... before any further interaction.</div>
+              </div>
+              <div class="action-arrow" style="color:var(--accent);">→</div>
+            </div>
+          </div>
+
+          <div class="modal-handled-btn">✓ Mark as Handled</div>
+        </div>
+      </div>
+      <div class="phone-home-bar"><div class="phone-home-bar-line"></div></div>
+    </div>
+    <div class="screen-label">04 — ACT NOW MODAL</div>
+  </div>
+
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║  SCREEN 5 — SAFESEND        ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+        <div class="app-header">
+          <div class="app-header-title">
+            <span class="wordmark">SafeSend</span>
+          </div>
+        </div>
+
+        <div class="safesend-intro">
+          <div class="safesend-title">Risk Check</div>
+          <div class="safesend-subtitle">Verify any address before sending funds</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-group">
+            <label class="form-label">RECIPIENT ADDRESS</label>
+            <div class="form-input filled">0x7f268357A8c2552623316e2562D90e642bB538E5</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">NETWORK</label>
+            <div class="network-select">
+              <span class="net-chip selected-eth">ETH</span>
+              <span class="net-chip unsel">SOL</span>
+              <span class="net-chip unsel">TRX</span>
+              <span class="net-chip unsel">ATOM</span>
+              <span class="net-chip unsel">XLM</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">AMOUNT (USD)</label>
+              <div class="form-input filled">2,500</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">MY ADDRESS (OPT.)</label>
+              <div class="form-input empty">0x742d...4e</div>
+            </div>
+          </div>
+
+          <button class="check-btn" style="background:var(--s2);color:var(--t2);border:1px solid var(--border);">✓ Checked</button>
+        </div>
+
+        <!-- Results card -->
+        <div class="result-card">
+          <div class="result-header">
+            <div>
+              <div class="result-risk-label">🚨 HIGH RISK</div>
+              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);margin-top:4px;">Counterparty risk score</div>
+            </div>
+            <div class="result-score">8.2 / 10</div>
+          </div>
+          <div class="result-body">
+            <div class="result-row">
+              <span class="result-key">OFAC SANCTIONED</span>
+              <span class="result-val-bad">🚫 YES</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">TOKEN BLACKLISTED</span>
+              <span class="result-val-bad">🚫 YES</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">DRAINER LINKS</span>
+              <span class="result-val-bad">DETECTED</span>
+            </div>
+            <div class="result-row" style="border:none;">
+              <span class="result-key">PAYMENT RISK</span>
+              <span class="result-val-bad">HIGH</span>
+            </div>
+            <div class="result-reasoning">
+              Address linked to known drainer contracts on Ethereum. Flagged in multiple sanction lists. High-value transfers show patterns consistent with laundering activity.
+            </div>
+          </div>
+          <div class="verdict-banner">🛑 DO NOT SEND — Sanctioned address</div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item"><span class="tab-icon">🛡</span><span class="tab-label">WALLETS</span></div>
+          <div class="tab-item"><span class="tab-icon">🔔</span><span class="tab-label">ALERTS</span></div>
+          <div class="tab-item active"><span class="tab-icon">✈️</span><span class="tab-label">SAFESEND</span></div>
+        </div>
+      </div>
+      <div class="phone-home-bar"><div class="phone-home-bar-line"></div></div>
+    </div>
+    <div class="screen-label">05 — SAFESEND</div>
+  </div>
+
+</div><!-- /screens-row -->
+
+<!-- Bottom hint -->
+<div style="padding:0 48px 48px;font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;letter-spacing:0.12em;border-top:1px solid #141414;padding-top:24px;">
+  VIGIL BY RANGE · HACKATHON BUILD · PASTE THIS FILE TO CLAUDE CODE AS DESIGN REFERENCE
+</div>
+
+</body>
+</html>
