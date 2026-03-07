@@ -119,8 +119,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** TASK-006
-- **Last Action:** TASK-006 IMPLEMENTED — poller.js + 9 passing tests
-- **Next Action:** Review TASK-006
+- **Current Task:** TASK-005
+- **Last Action:** TASK-005 IMPLEMENTED — alerts.js + 19 passing tests
+- **Next Action:** Review TASK-005
 - **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** pending
+- **Last Commit:** pending hydra: TASK-005 commit

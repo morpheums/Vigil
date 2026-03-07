@@ -1,7 +1,9 @@
 # TASK-005: Alerts module with Act Now actions
 
 - **ID**: TASK-005
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
+- **Base SHA**: 229862b8fa6c89fcb216888c6ecf8c380e1b5d61
+- **claimed_at**: 2026-03-07
 - **Group**: 2
 - **Wave**: 2
 - **Depends on**: TASK-001, TASK-002
@@ -12,14 +14,14 @@
 Implement the alerts module (alerts.js) with Expo push notifications, Resend email sending, Act Now action builder, and alert logging to SQLite.
 
 ## Acceptance Criteria
-- [ ] buildActNowActions(tx, riskInfo) returns correct contextual actions based on tx.direction, riskInfo.risk_level, sanctions status, and amount — always includes safesend_check as last action
-- [ ] fireAlert(wallet, tx, riskInfo, actNowActions) sends Expo push (if token present), Resend email (if email present), and logs to alert_log table with JSON-serialized act_now_actions and channels
-- [ ] Alert messages follow the spec format: prefix emoji, direction, amount, token, network, counterparty risk, and "Tap for Act Now actions" for urgent alerts
+- [x] buildActNowActions(tx, riskInfo) returns correct contextual actions based on tx.direction, riskInfo.risk_level, sanctions status, and amount — always includes safesend_check as last action
+- [x] fireAlert(wallet, tx, riskInfo, actNowActions) sends Expo push (if token present), Resend email (if email present), and logs to alert_log table with JSON-serialized act_now_actions and channels
+- [x] Alert messages follow the spec format: prefix emoji, direction, amount, token, network, counterparty risk, and "Tap for Act Now actions" for urgent alerts
 
 ## Test Requirements
-- [ ] Unit test buildActNowActions with: outgoing HIGH tx (should include revoke action), incoming HIGH tx (should include isolate action), sanctioned address (should include do_not_interact), tx > $500 (should include document action)
-- [ ] Unit test fireAlert with mocked push/email that verifies correct message format and DB logging
-- [ ] Test that channels array correctly reflects which channels were used
+- [x] Unit test buildActNowActions with: outgoing HIGH tx (should include revoke action), incoming HIGH tx (should include isolate action), sanctioned address (should include do_not_interact), tx > $500 (should include document action)
+- [x] Unit test fireAlert with mocked push/email that verifies correct message format and DB logging
+- [x] Test that channels array correctly reflects which channels were used
 
 ## Implementation Notes
 - Reference: VIGIL_SPEC.md lines 251-537 for Act Now and alerts logic
