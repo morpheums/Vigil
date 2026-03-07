@@ -1,7 +1,9 @@
 # TASK-001: Backend package.json, .env template, and SQLite database module
 
 - **ID**: TASK-001
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
+- **Base SHA**: 8f3236b87e12b46dc1ef9600898d8dc0e9811649
+- **claimed_at**: 2026-03-07
 - **Group**: 1
 - **Wave**: 1
 - **Depends on**: none

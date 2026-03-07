@@ -117,7 +117,7 @@
     "auto_commit": true,
     "commit_prefix": "hydra:",
     "branch_per_task": true,
-    "last_task_branch": null
+    "last_task_branch": "hydra/TASK-003"
   },
   "context": {
     "budget_strategy": "aggressive",

@@ -1,3 +1,76 @@
+diff --git a/vigil/backend/range.js b/vigil/backend/range.js
+new file mode 100644
+index 0000000..ee0cb5a
+--- /dev/null
++++ b/vigil/backend/range.js
+@@ -0,0 +1,67 @@
++require('dotenv').config();
++
++const BASE = 'https://api.range.org/ai/mcp';
++
++async function callTool(toolName, params) {
++  const res = await fetch(BASE, {
++    method: 'POST',
++    headers: {
++      'Content-Type': 'application/json',
++      'Authorization': `Bearer ${process.env.RANGE_API_KEY}`
++    },
++    body: JSON.stringify({
++      jsonrpc: '2.0',
++      id: Date.now(),
++      method: 'tools/call',
++      params: { name: toolName, arguments: params }
++    })
++  });
++  const data = await res.json();
++  if (data.error) throw new Error(`Range API error: ${data.error.message}`);
++  return JSON.parse(data.result.content[0].text);
++}
++
++function getAddressPayments(address, network, limit = 25) {
++  return callTool('get_address_payments', { address, network, limit });
++}
++
++function getAddressRisk(address, network) {
++  return callTool('get_address_risk', { address, network });
++}
++
++function getAddressConnections(address, network, size = 15) {
++  return callTool('get_address_connections', { address, network, size });
++}
++
++function checkSanctions(address, network) {
++  return callTool('check_sanctions', { address, network });
++}
++
++function getPaymentRisk(senderAddress, recipientAddress, amount, senderNetwork, recipientNetwork) {
++  return callTool('get_payment_risk', {
++    sender_address: senderAddress,
++    recipient_address: recipientAddress,
++    amount,
++    sender_network: senderNetwork,
++    recipient_network: recipientNetwork
++  });
++}
++
++function getAddressFundedBy(address, network) {
++  return callTool('get_address_funded_by', { address, network });
++}
++
++function getAddressFeatures(address, network) {
++  return callTool('get_address_features', { address, network });
++}
++
++module.exports = {
++  callTool,
++  getAddressPayments,
++  getAddressRisk,
++  getAddressConnections,
++  checkSanctions,
++  getPaymentRisk,
++  getAddressFundedBy,
++  getAddressFeatures
++};
 diff --git a/vigil/backend/__tests__/range.test.js b/vigil/backend/__tests__/range.test.js
 new file mode 100644
 index 0000000..16b0295
@@ -186,76 +259,3 @@ index 0000000..16b0295
 +    expect(body.params.arguments).toEqual({ address: '0x444', network: 'cosmoshub-4' });
 +  });
 +});
-diff --git a/vigil/backend/range.js b/vigil/backend/range.js
-new file mode 100644
-index 0000000..ee0cb5a
---- /dev/null
-+++ b/vigil/backend/range.js
-@@ -0,0 +1,67 @@
-+require('dotenv').config();
-+
-+const BASE = 'https://api.range.org/ai/mcp';
-+
-+async function callTool(toolName, params) {
-+  const res = await fetch(BASE, {
-+    method: 'POST',
-+    headers: {
-+      'Content-Type': 'application/json',
-+      'Authorization': `Bearer ${process.env.RANGE_API_KEY}`
-+    },
-+    body: JSON.stringify({
-+      jsonrpc: '2.0',
-+      id: Date.now(),
-+      method: 'tools/call',
-+      params: { name: toolName, arguments: params }
-+    })
-+  });
-+  const data = await res.json();
-+  if (data.error) throw new Error(`Range API error: ${data.error.message}`);
-+  return JSON.parse(data.result.content[0].text);
-+}
-+
-+function getAddressPayments(address, network, limit = 25) {
-+  return callTool('get_address_payments', { address, network, limit });
-+}
-+
-+function getAddressRisk(address, network) {
-+  return callTool('get_address_risk', { address, network });
-+}
-+
-+function getAddressConnections(address, network, size = 15) {
-+  return callTool('get_address_connections', { address, network, size });
-+}
-+
-+function checkSanctions(address, network) {
-+  return callTool('check_sanctions', { address, network });
-+}
-+
-+function getPaymentRisk(senderAddress, recipientAddress, amount, senderNetwork, recipientNetwork) {
-+  return callTool('get_payment_risk', {
-+    sender_address: senderAddress,
-+    recipient_address: recipientAddress,
-+    amount,
-+    sender_network: senderNetwork,
-+    recipient_network: recipientNetwork
-+  });
-+}
-+
-+function getAddressFundedBy(address, network) {
-+  return callTool('get_address_funded_by', { address, network });
-+}
-+
-+function getAddressFeatures(address, network) {
-+  return callTool('get_address_features', { address, network });
-+}
-+
-+module.exports = {
-+  callTool,
-+  getAddressPayments,
-+  getAddressRisk,
-+  getAddressConnections,
-+  checkSanctions,
-+  getPaymentRisk,
-+  getAddressFundedBy,
-+  getAddressFeatures
-+};

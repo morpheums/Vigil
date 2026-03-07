@@ -12,9 +12,9 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Status Summary
 - Total tasks: 12
-- DONE: 0 | READY: 0 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 12
-- Current iteration: 0/40
-- Active task: none
+- DONE: 0 | READY: 0 | IN_PROGRESS: 0 | IN_REVIEW: 3 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 9
+- Current iteration: 1/40
+- Active task: TASK-001 (review pending)
 
 ## Wave Groups
 
@@ -43,7 +43,7 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Tasks
 
 ### TASK-001: Backend package.json, .env template, and SQLite database module
-- **Status**: PLANNED
+- **Status**: IMPLEMENTED
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-001.md
@@ -119,8 +119,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** TASK-002
-- **Last Action:** TASK-002 IMPLEMENTED — range.js + tests, all 13 tests passing
-- **Next Action:** Review TASK-002
+- **Current Task:** none (Wave 1 complete)
+- **Last Action:** Wave 1 merged — TASK-001, TASK-002, TASK-003 all IMPLEMENTED
+- **Next Action:** Run reviews for Wave 1 tasks, then promote Wave 2 tasks to READY
 - **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** 2757cf5
+- **Last Commit:** pending merge commit
