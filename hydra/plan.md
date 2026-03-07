@@ -12,9 +12,9 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Status Summary
 - Total tasks: 12
-- DONE: 6 | READY: 1 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 5
-- Current iteration: 2/40
-- Active task: TASK-007 (Wave 3)
+- DONE: 7 | READY: 3 | IN_PROGRESS: 0 | IN_REVIEW: 0 | CHANGES_REQUESTED: 0 | BLOCKED: 0 | PLANNED: 2
+- Current iteration: 5/40
+- Active task: Wave 4 (TASK-008, TASK-009, TASK-010)
 
 ## Wave Groups
 
@@ -79,25 +79,25 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-006.md
 
 ### TASK-007: Express server with all REST routes
-- **Status**: READY
+- **Status**: DONE
 - **Group**: 3
 - **Depends on**: TASK-001, TASK-002, TASK-004, TASK-005, TASK-006
 - **Manifest**: hydra/tasks/TASK-007.md
 
 ### TASK-008: WalletCard, RiskBadge components + Wallets tab
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-008.md
 
 ### TASK-009: AlertItem, ActNowCard components + Alerts tab
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-009.md
 
 ### TASK-010: SafeSend tab with risk check form
-- **Status**: PLANNED
+- **Status**: READY
 - **Group**: 4
 - **Depends on**: TASK-003, TASK-007
 - **Manifest**: hydra/tasks/TASK-010.md
@@ -121,12 +121,13 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - [x] TASK-004: Contagion score engine -> DONE
 - [x] TASK-005: Alerts module with Act Now actions -> DONE
 - [x] TASK-006: Polling loop -> DONE
+- [x] TASK-007: Express server with all REST routes -> DONE
 
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** TASK-007
-- **Last Action:** Wave 2 merged — all backend modules complete with tests
-- **Next Action:** Implement TASK-007 (Express server with all REST routes)
-- **Last Checkpoint:** pending
-- **Last Commit:** pending
+- **Current Task:** Wave 4 (TASK-008, TASK-009, TASK-010)
+- **Last Action:** TASK-007 reviewed and merged to master
+- **Next Action:** Launch Wave 4 parallel implementation
+- **Last Checkpoint:** TASK-007 DONE, Wave 4 promoted to READY
+- **Last Commit:** pending merge commit
