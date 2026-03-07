@@ -99,7 +99,13 @@ function insertWallet(address, network, label, expoPushToken, alertEmail) {
 
 function getWallets() {
   const db = getDb();
-  return db.prepare('SELECT * FROM wallets ORDER BY created_at DESC').all();
+  return db.prepare(`
+    SELECT w.*, MAX(st.seen_at) AS last_activity
+    FROM wallets w
+    LEFT JOIN seen_transactions st ON st.wallet_id = w.id
+    GROUP BY w.id
+    ORDER BY w.created_at DESC
+  `).all();
 }
 
 function getWallet(id) {
@@ -146,10 +152,15 @@ function insertAlert(walletId, txHash, message, riskLevel, actNowActions, channe
 
 function getAlerts(limit = 50, walletId = null) {
   const db = getDb();
+  const baseQuery = `
+    SELECT a.*, w.label AS wallet_label, w.address AS wallet_address
+    FROM alert_log a
+    LEFT JOIN wallets w ON w.id = a.wallet_id
+  `;
   if (walletId) {
-    return db.prepare('SELECT * FROM alert_log WHERE wallet_id = ? ORDER BY sent_at DESC LIMIT ?').all(walletId, limit);
+    return db.prepare(`${baseQuery} WHERE a.wallet_id = ? ORDER BY a.sent_at DESC LIMIT ?`).all(walletId, limit);
   }
-  return db.prepare('SELECT * FROM alert_log ORDER BY sent_at DESC LIMIT ?').all(limit);
+  return db.prepare(`${baseQuery} ORDER BY a.sent_at DESC LIMIT ?`).all(limit);
 }
 
 function acknowledgeAlert(alertId) {

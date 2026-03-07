@@ -16,8 +16,22 @@ async function callTool(toolName, params) {
       params: { name: toolName, arguments: params }
     })
   });
+
+  if (res.status === 429) {
+    throw new Error('Range API rate limited — try again later');
+  }
+  if (!res.ok) {
+    throw new Error(`Range API HTTP ${res.status}: ${res.statusText}`);
+  }
+
   const data = await res.json();
-  if (data.error) throw new Error(`Range API error: ${data.error.message}`);
+  if (data.error) {
+    const msg = typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error));
+    throw new Error(`Range API error: ${msg}`);
+  }
+  if (!data.result?.content?.[0]?.text) {
+    throw new Error(`Range API: unexpected response shape`);
+  }
   return JSON.parse(data.result.content[0].text);
 }
 

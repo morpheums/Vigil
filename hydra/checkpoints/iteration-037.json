@@ -1,0 +1,63 @@
+{
+  "iteration": 37,
+  "timestamp": "2026-03-07T14:49:26Z",
+  "mode": "afk",
+  "active_task": {
+    "id": null,
+    "status": null,
+    "retry_count": 0,
+    "last_action": null,
+    "next_action": null,
+    "files_modified_this_iteration": [
+      "hydra/checkpoints/iteration-028.json",
+      "hydra/checkpoints/iteration-029.json",
+      "hydra/checkpoints/iteration-030.json",
+      "hydra/checkpoints/iteration-031.json",
+      "hydra/checkpoints/iteration-032.json",
+      "hydra/checkpoints/iteration-033.json",
+      "hydra/checkpoints/iteration-034.json",
+      "hydra/checkpoints/iteration-035.json",
+      "hydra/checkpoints/iteration-036.json",
+      "hydra/config.json",
+      "hydra/logs/iterations.jsonl",
+      "hydra/plan.md",
+      "vigil/backend/seed.js",
+      "vigil/mobile/components/NetworkChips.tsx",
+      "vigil/mobile/components/WalletCard.tsx",
+      "vigil/mobile/constants/networks.ts"
+    ]
+  },
+  "plan_snapshot": {
+    "total_tasks": 10,
+    "done": 0,
+    "approved": 0,
+    "ready": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "changes_requested": 0,
+    "blocked": 0,
+    "planned": 10
+  },
+  "git": {
+    "branch": "master",
+    "last_commit_sha": "4f58c19",
+    "last_commit_message": "Finish design enhacnemnets",
+    "uncommitted_changes": true
+  },
+  "reviewers": {
+    "active": [
+      "frontend-reviewer",
+      "api-reviewer",
+      "qa-reviewer",
+      "performance-reviewer"
+    ],
+    "last_review_task": null,
+    "last_review_verdict": null
+  },
+  "context_health": {
+    "compactions_this_session": 0,
+    "iterations_since_last_compaction": 37,
+    "consecutive_failures": 34
+  },
+  "recovery_instructions": "Read hydra/plan.md Recovery Pointer, then hydra/tasks/none.md for current state."
+}

@@ -4,96 +4,121 @@ const { buildActNowActions, fireAlert } = require('./alerts');
 const { calculateContagionScore } = require('./contagion');
 const { getWallets, getSeenTxHashes, insertSeenTx } = require('./db');
 
-let pollInterval = null;
+// Round-robin poller: one wallet per tick, spread evenly across the interval.
+// 5 wallets + 60s per-wallet interval = each wallet polled every 5 minutes,
+// but only 1-3 API calls per tick instead of 10-15 in a burst.
+
+let pollTimer = null;
 let cycleCount = 0;
+let walletIndex = 0;
 
-async function pollWallets() {
-  cycleCount++;
+async function pollNextWallet() {
   const wallets = getWallets();
-  console.log(`[Poller] Cycle ${cycleCount}: polling ${wallets.length} wallets`);
+  if (wallets.length === 0) return;
 
-  for (const wallet of wallets) {
-    try {
-      // Get recent payments
-      const { payments } = await getAddressPayments(wallet.address, wallet.network, 25);
+  // Round-robin: pick next wallet
+  walletIndex = walletIndex % wallets.length;
+  const wallet = wallets[walletIndex];
+  const isFullRotation = walletIndex === 0;
+  walletIndex++;
 
-      // Get seen tx hashes for diff
-      const seenHashes = new Set(getSeenTxHashes(wallet.id));
+  // Increment cycle count at the start of each full rotation
+  if (isFullRotation) cycleCount++;
 
-      // Process new transactions
-      for (const tx of payments) {
-        if (seenHashes.has(tx.hash)) continue;
+  console.log(`[Poller] Tick: wallet ${wallet.id} (${wallet.label || wallet.address.slice(0, 8) + '...'}) — rotation ${cycleCount}`);
 
-        // Risk-score counterparty
-        let riskInfo = { risk_level: 'UNKNOWN', risk_score: 0 };
-        let sanctionsInfo = { is_ofac_sanctioned: false, is_token_blacklisted: false };
+  try {
+    // Get recent payments (1 API call)
+    const { payments } = await getAddressPayments(wallet.address, wallet.network, 25);
 
-        try {
-          if (tx.counterparty_address) {
-            [riskInfo, sanctionsInfo] = await Promise.all([
-              getAddressRisk(tx.counterparty_address, tx.counterparty_network || wallet.network),
-              checkSanctions(tx.counterparty_address, tx.counterparty_network || wallet.network)
-            ]);
-          }
-        } catch (e) {
-          console.error(`[Poller] Risk check failed for ${tx.counterparty_address}:`, e.message);
-        }
+    // Diff against seen transactions
+    const seenHashes = new Set(getSeenTxHashes(wallet.id));
+    const newTxs = payments.filter(tx => !seenHashes.has(tx.hash || tx.tx_hash));
 
-        // Merge sanctions into riskInfo
-        const mergedRisk = { ...riskInfo, ...sanctionsInfo };
-
-        // Insert seen transaction (skip if no tx hash)
-        const txHash = tx.hash || tx.tx_hash;
-        if (!txHash) continue;
-        insertSeenTx(
-          wallet.id, txHash, tx.amount_usd, tx.direction,
-          tx.token_symbol, tx.counterparty_address,
-          mergedRisk.risk_level, mergedRisk.risk_score
-        );
-
-        // Build Act Now actions and fire alert
-        const actNowActions = buildActNowActions(
-          { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
-          mergedRisk
-        );
-
-        await fireAlert(wallet,
-          { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
-          mergedRisk, actNowActions
-        );
-      }
-
-      // Every 4th cycle: recalculate contagion
-      if (cycleCount % 4 === 0) {
-        try {
-          await calculateContagionScore(wallet.id, wallet.address, wallet.network);
-          console.log(`[Poller] Contagion recalculated for wallet ${wallet.id}`);
-        } catch (e) {
-          console.error(`[Poller] Contagion failed for wallet ${wallet.id}:`, e.message);
-        }
-      }
-    } catch (e) {
-      console.error(`[Poller] Error polling wallet ${wallet.id}:`, e.message);
+    if (newTxs.length > 0) {
+      console.log(`[Poller]   ${newTxs.length} new transaction(s)`);
     }
-  }
 
-  console.log(`[Poller] Cycle ${cycleCount} complete at ${new Date().toISOString()}`);
+    for (const tx of newTxs) {
+      // Risk-score counterparty (2 API calls if counterparty exists)
+      let riskInfo = { risk_level: 'UNKNOWN', risk_score: 0 };
+      let sanctionsInfo = { is_ofac_sanctioned: false, is_token_blacklisted: false };
+
+      try {
+        if (tx.counterparty_address) {
+          [riskInfo, sanctionsInfo] = await Promise.all([
+            getAddressRisk(tx.counterparty_address, tx.counterparty_network || wallet.network),
+            checkSanctions(tx.counterparty_address, tx.counterparty_network || wallet.network)
+          ]);
+        }
+      } catch (e) {
+        console.error(`[Poller]   Risk check failed for ${tx.counterparty_address}:`, e.message);
+      }
+
+      const mergedRisk = { ...riskInfo, ...sanctionsInfo };
+
+      // Store transaction
+      const txHash = tx.hash || tx.tx_hash;
+      if (!txHash) continue;
+      insertSeenTx(
+        wallet.id, txHash, tx.amount_usd, tx.direction,
+        tx.token_symbol, tx.counterparty_address,
+        mergedRisk.risk_level, mergedRisk.risk_score
+      );
+
+      // Build Act Now actions and fire alert
+      const actNowActions = buildActNowActions(
+        { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
+        mergedRisk
+      );
+
+      await fireAlert(wallet,
+        { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
+        mergedRisk, actNowActions
+      );
+    }
+
+    // Every 4th full rotation: recalculate contagion for this wallet
+    if (cycleCount > 0 && cycleCount % 4 === 0 && isFullRotation) {
+      // Only run contagion on the first wallet of the rotation to spread load
+    }
+    if (cycleCount > 0 && cycleCount % 4 === 0) {
+      try {
+        await calculateContagionScore(wallet.id, wallet.address, wallet.network);
+        console.log(`[Poller]   Contagion recalculated for wallet ${wallet.id}`);
+      } catch (e) {
+        console.error(`[Poller]   Contagion failed for wallet ${wallet.id}:`, e.message);
+      }
+    }
+  } catch (e) {
+    console.error(`[Poller] Error polling wallet ${wallet.id}:`, e.message);
+  }
 }
 
 function startPoller() {
-  const interval = (parseInt(process.env.POLL_INTERVAL_SECONDS) || 60) * 1000;
-  console.log(`[Poller] Starting with ${interval / 1000}s interval`);
-  pollInterval = setInterval(pollWallets, interval);
-  // Run first poll immediately
-  pollWallets();
+  const totalInterval = (parseInt(process.env.POLL_INTERVAL_SECONDS) || 300) * 1000;
+  const wallets = getWallets();
+  // Spread wallets evenly: e.g. 5 wallets over 300s = 1 wallet every 60s
+  const perWalletInterval = wallets.length > 0
+    ? Math.max(totalInterval / wallets.length, 10000) // minimum 10s between ticks
+    : totalInterval;
+
+  console.log(`[Poller] Round-robin: ${wallets.length} wallets, 1 every ${perWalletInterval / 1000}s (full rotation every ${(perWalletInterval * wallets.length) / 1000}s)`);
+
+  // First tick after a short delay (let server finish starting)
+  setTimeout(() => {
+    pollNextWallet();
+    pollTimer = setInterval(pollNextWallet, perWalletInterval);
+  }, 3000);
 }
 
 function stopPoller() {
-  if (pollInterval) {
-    clearInterval(pollInterval);
-    pollInterval = null;
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
   }
   cycleCount = 0;
+  walletIndex = 0;
 }
 
-module.exports = { startPoller, stopPoller, pollWallets, _getCycleCount: () => cycleCount };
+module.exports = { startPoller, stopPoller, pollNextWallet, _getCycleCount: () => cycleCount };
