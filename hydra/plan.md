@@ -131,8 +131,8 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 ## Blocked
 
 ## Recovery Pointer
-- **Current Task:** NONE — ALL 12 TASKS COMPLETE
-- **Last Action:** Wave 5 reviewed and merged — all integration features done
-- **Next Action:** Post-loop agents (documentation, release)
-- **Last Checkpoint:** All tasks DONE
-- **Last Commit:** pending Wave 5 merge
+- **Current Task:** none
+- **Last Action:** Iteration 14 completed
+- **Next Action:** Continue work on next READY task
+- **Last Checkpoint:** hydra/checkpoints/iteration-014.json
+- **Last Commit:** d836f1a hydra: add Vigil logo, DB seed, fix Range API MCP session handling

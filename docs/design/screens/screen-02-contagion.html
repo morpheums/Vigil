@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vigil — 02 Contagion Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080808;--s1:#111111;--s2:#181818;--s3:#202020;--border:#242424;--border2:#2e2e2e;--accent:#3DFFA0;--accent-10:rgba(61,255,160,0.10);--accent-20:rgba(61,255,160,0.20);--warn:#F5A623;--danger:#FF3B30;--danger-10:rgba(255,59,48,0.10);--t1:#FFFFFF;--t2:#888888;--t3:#444444;--eth:#627EEA;--sol:#9945FF;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#050505;font-family:'Inter',sans-serif;color:var(--t1);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  .label{font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;letter-spacing:0.2em;margin-bottom:20px;text-align:center;}
+  .phone{width:390px;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:44px;overflow:hidden;box-shadow:0 0 0 1px #333 inset,0 40px 100px rgba(0,0,0,0.7),0 0 60px rgba(61,255,160,0.04);display:flex;flex-direction:column;}
+  .notch{height:34px;display:flex;align-items:center;justify-content:center;padding-top:8px;}
+  .notch-bar{width:120px;height:5px;background:#1e1e1e;border-radius:10px;}
+  .screen{flex:1;background:var(--bg);display:flex;flex-direction:column;min-height:780px;}
+  .home-bar{height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .home-line{width:120px;height:4px;background:#222;border-radius:10px;}
+  .status{display:flex;justify-content:space-between;padding:6px 20px;font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);}
+  .back-row{display:flex;align-items:center;gap:8px;padding:10px 18px 6px;}
+  .back-btn{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;}
+  .bn{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:8px;letter-spacing:0.08em;border-radius:4px;padding:2px 7px;border:1px solid;}
+  .br{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:8px;letter-spacing:0.1em;border-radius:4px;padding:2px 7px;border:1px solid;}
+  .r-low{color:var(--accent);background:rgba(61,255,160,0.10);border-color:rgba(61,255,160,0.3);}
+  .r-med{color:var(--warn);background:rgba(245,166,35,0.10);border-color:rgba(245,166,35,0.3);}
+  .r-high{color:var(--danger);background:rgba(255,59,48,0.10);border-color:rgba(255,59,48,0.3);}
+  .n-eth{color:var(--eth);background:rgba(98,126,234,0.10);border-color:rgba(98,126,234,0.3);}
+  .detail-header{padding:6px 18px 14px;border-bottom:1px solid var(--border);}
+  .detail-addr{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin:4px 0 8px;word-break:break-all;}
+  .detail-stats{display:flex;gap:10px;}
+  .dstat{flex:1;background:var(--s2);border-radius:10px;padding:10px;border:1px solid var(--border);}
+  .dstat-val{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;margin-bottom:2px;}
+  .dstat-key{font-family:'Space Mono',monospace;font-size:8px;color:var(--t3);letter-spacing:0.1em;}
+  .csection{padding:14px 18px;border-bottom:1px solid var(--border);}
+  .ctitle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cscore-big{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;line-height:1;}
+  .csub{font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);margin-top:3px;}
+  .cgraph-wrap{background:var(--s2);border-radius:14px;border:1px solid var(--border);height:180px;position:relative;overflow:hidden;}
+  .graph-svg{width:100%;height:100%;}
+  .scroll{flex:1;overflow-y:auto;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .tx-list{padding:0 18px;}
+  .tx-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .tx-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+  .tx-info{flex:1;}
+  .tx-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:3px;}
+  .tx-meta{display:flex;gap:5px;align-items:center;}
+  .tx-amt{font-family:'Space Mono',monospace;font-weight:700;font-size:12px;text-align:right;}
+  .tx-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);text-align:right;margin-top:2px;}
+  .tab-bar{display:flex;border-top:1px solid var(--border);background:var(--s1);padding:6px 0 2px;margin-top:auto;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;}
+  .ti{font-size:18px;}
+  .tl{font-family:'Space Mono',monospace;font-size:8px;color:var(--t3);letter-spacing:0.08em;}
+  .tab.on .tl{color:var(--accent);}
+  .tab.on .ti{filter:drop-shadow(0 0 6px var(--accent));}
+</style>
+</head>
+<body>
+<div class="label">VIGIL BY RANGE · 02 — CONTAGION DETAIL</div>
+<div class="phone">
+  <div class="notch"><div class="notch-bar"></div></div>
+  <div class="screen">
+    <div class="status"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+    <div class="back-row"><button class="back-btn">← Back</button></div>
+
+    <div class="detail-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;">Main Wallet</span>
+        <span class="bn n-eth">ETH</span>
+        <span class="br r-low">LOW</span>
+      </div>
+      <div class="detail-addr">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</div>
+      <div class="detail-stats">
+        <div class="dstat"><div class="dstat-val">$12,400</div><div class="dstat-key">BALANCE</div></div>
+        <div class="dstat"><div class="dstat-val" style="color:#F5A623;">5.8</div><div class="dstat-key">CONTAGION</div></div>
+        <div class="dstat"><div class="dstat-val">2 min</div><div class="dstat-key">LAST TX</div></div>
+      </div>
+    </div>
+
+    <div class="csection">
+      <div class="ctitle-row">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.18em;margin-bottom:4px;">CONTAGION SCORE</div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span class="cscore-big" style="color:#F5A623;">5.8</span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--t2);">/ 10</span>
+          </div>
+          <div class="csub">2 of 9 neighbors are high risk</div>
+        </div>
+        <button style="background:var(--accent-10);border:1px solid rgba(61,255,160,0.2);border-radius:8px;padding:6px 12px;color:var(--accent);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:0.08em;">REFRESH</button>
+      </div>
+
+      <div class="cgraph-wrap">
+        <svg viewBox="0 0 356 180" class="graph-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="gc" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#3DFFA0" stop-opacity="0.08"/>
+              <stop offset="100%" stop-color="#3DFFA0" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="178" cy="90" rx="70" ry="70" fill="url(#gc)"/>
+          <!-- green edges -->
+          <line x1="178" y1="90" x2="178" y2="22"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+          <line x1="178" y1="90" x2="118" y2="38"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+          <line x1="178" y1="90" x2="68"  y2="75"  stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+          <line x1="178" y1="90" x2="75"  y2="138" stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+          <line x1="178" y1="90" x2="134" y2="162" stroke="#3DFFA0" stroke-width="1" stroke-opacity="0.25"/>
+          <!-- yellow edges -->
+          <line x1="178" y1="90" x2="238" y2="162" stroke="#F5A623" stroke-width="1.5" stroke-opacity="0.4"/>
+          <line x1="178" y1="90" x2="290" y2="130" stroke="#F5A623" stroke-width="1.5" stroke-opacity="0.4"/>
+          <!-- red edges -->
+          <line x1="178" y1="90" x2="288" y2="50"  stroke="#FF3B30" stroke-width="2" stroke-opacity="0.5"/>
+          <line x1="178" y1="90" x2="238" y2="22"  stroke="#FF3B30" stroke-width="2" stroke-opacity="0.5"/>
+          <!-- green nodes -->
+          <circle cx="178" cy="22"  r="9"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+          <circle cx="118" cy="38"  r="8"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+          <circle cx="68"  cy="75"  r="7"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+          <circle cx="75"  cy="138" r="9"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+          <circle cx="134" cy="162" r="8"  fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.5"/>
+          <!-- yellow nodes -->
+          <circle cx="238" cy="162" r="9"  fill="#F5A62320" stroke="#F5A623" stroke-width="1.5"/>
+          <circle cx="290" cy="130" r="10" fill="#F5A62320" stroke="#F5A623" stroke-width="1.5"/>
+          <!-- red nodes -->
+          <circle cx="288" cy="50"  r="12" fill="#FF3B3025" stroke="#FF3B30" stroke-width="2"/>
+          <text x="288" y="55" text-anchor="middle" font-family="Space Mono" font-size="7" fill="#FF3B30">!</text>
+          <circle cx="238" cy="22"  r="11" fill="#FF3B3025" stroke="#FF3B30" stroke-width="2"/>
+          <text x="238" y="27" text-anchor="middle" font-family="Space Mono" font-size="7" fill="#FF3B30">!</text>
+          <!-- root -->
+          <circle cx="178" cy="90" r="20" fill="#3DFFA018" stroke="#3DFFA0" stroke-width="2.5"/>
+          <circle cx="178" cy="90" r="12" fill="#0a0a0a" stroke="#3DFFA0" stroke-width="1.5"/>
+          <text x="178" y="95" text-anchor="middle" font-family="Space Mono" font-size="9" font-weight="700" fill="#3DFFA0">YOU</text>
+          <!-- legend -->
+          <circle cx="16" cy="162" r="5" fill="#3DFFA020" stroke="#3DFFA0" stroke-width="1.2"/>
+          <text x="25" y="166" font-family="Space Mono" font-size="8" fill="#888">SAFE</text>
+          <circle cx="62" cy="162" r="5" fill="#F5A62320" stroke="#F5A623" stroke-width="1.2"/>
+          <text x="71" y="166" font-family="Space Mono" font-size="8" fill="#888">MED</text>
+          <circle cx="108" cy="162" r="5" fill="#FF3B3025" stroke="#FF3B30" stroke-width="1.2"/>
+          <text x="117" y="166" font-family="Space Mono" font-size="8" fill="#888">HIGH</text>
+        </svg>
+      </div>
+    </div>
+
+    <div style="padding:10px 18px 4px;"><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.18em;">RECENT TRANSACTIONS</div></div>
+    <div class="scroll">
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);">↑</div>
+          <div class="tx-info">
+            <div class="tx-title">Sent USDC</div>
+            <div class="tx-meta"><span class="br r-high">HIGH</span><span class="bn n-eth">ETH</span></div>
+          </div>
+          <div><div class="tx-amt" style="color:var(--danger);">-$2,500</div><div class="tx-time">2m ago</div></div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(61,255,160,0.08);border:1px solid rgba(61,255,160,0.15);">↓</div>
+          <div class="tx-info">
+            <div class="tx-title">Received USDT</div>
+            <div class="tx-meta"><span class="br r-med">MEDIUM</span><span class="bn n-eth">ETH</span></div>
+          </div>
+          <div><div class="tx-amt" style="color:var(--accent);">+$800</div><div class="tx-time">1h ago</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab on"><span class="ti">🛡</span><span class="tl">WALLETS</span></div>
+      <div class="tab"><span class="ti">🔔</span><span class="tl">ALERTS</span></div>
+      <div class="tab"><span class="ti">✈️</span><span class="tl">SAFESEND</span></div>
+    </div>
+  </div>
+  <div class="home-bar"><div class="home-line"></div></div>
+</div>
+</body>
+</html>

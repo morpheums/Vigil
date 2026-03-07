@@ -1,6 +1,6 @@
 {
-  "iteration": 11,
-  "timestamp": "2026-03-07T13:14:48Z",
+  "iteration": 13,
+  "timestamp": "2026-03-07T13:21:51Z",
   "mode": "afk",
   "active_task": {
     "id": null,
@@ -8,22 +8,7 @@
     "retry_count": 0,
     "last_action": null,
     "next_action": null,
-    "files_modified_this_iteration": [
-      "hydra/checkpoints/iteration-010.json",
-      "hydra/checkpoints/iteration-011.json",
-      "hydra/config.json",
-      "hydra/logs/iterations.jsonl",
-      "hydra/plan.md",
-      "hydra/reviews/TASK-011-review.md",
-      "hydra/reviews/TASK-012-review.md",
-      "hydra/tasks/TASK-011.md",
-      "hydra/tasks/TASK-012.md",
-      "vigil/mobile/app/(tabs)/alerts.tsx",
-      "vigil/mobile/app/(tabs)/index.tsx",
-      "vigil/mobile/app/_layout.tsx",
-      "vigil/mobile/app/wallet-detail.tsx",
-      "vigil/mobile/components/ActNowCard.tsx"
-    ]
+    "files_modified_this_iteration": []
   },
   "plan_snapshot": {
     "total_tasks": 12,
@@ -54,8 +39,8 @@
   },
   "context_health": {
     "compactions_this_session": 0,
-    "iterations_since_last_compaction": 11,
-    "consecutive_failures": 1
+    "iterations_since_last_compaction": 13,
+    "consecutive_failures": 3
   },
   "recovery_instructions": "Read hydra/plan.md Recovery Pointer, then hydra/tasks/none.md for current state."
 }

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vigil — 04 Act Now Modal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080808;--s1:#111111;--s2:#181818;--border:#242424;--border2:#2e2e2e;--accent:#3DFFA0;--warn:#F5A623;--danger:#FF3B30;--t1:#FFFFFF;--t2:#888888;--t3:#444444;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#050505;font-family:'Inter',sans-serif;color:var(--t1);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  .label{font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;letter-spacing:0.2em;margin-bottom:20px;text-align:center;}
+  .phone{width:390px;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:44px;overflow:hidden;box-shadow:0 0 0 1px #333 inset,0 40px 100px rgba(0,0,0,0.7);display:flex;flex-direction:column;}
+  .notch{height:34px;display:flex;align-items:center;justify-content:center;padding-top:8px;}
+  .notch-bar{width:120px;height:5px;background:#1e1e1e;border-radius:10px;}
+  .screen{flex:1;background:var(--bg);display:flex;flex-direction:column;min-height:780px;}
+  .home-bar{height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .home-line{width:120px;height:4px;background:#222;border-radius:10px;}
+  .status{display:flex;justify-content:space-between;padding:6px 20px;font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);}
+  .modal{background:var(--bg);flex:1;display:flex;flex-direction:column;}
+  .handle{width:40px;height:4px;background:var(--border2);border-radius:4px;margin:10px auto 14px;}
+  .risk-header{padding:0 20px 16px;border-bottom:1px solid var(--border);}
+  .risk-indicator{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+  .risk-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.25);}
+  .risk-label{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--danger);line-height:1;letter-spacing:-0.02em;}
+  .risk-score-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
+  .risk-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;}
+  .risk-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--warn),var(--danger));width:82%;}
+  .risk-score-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--danger);font-weight:700;}
+  .tx-box{background:var(--s2);border-radius:10px;border:1px solid var(--border);padding:10px 12px;}
+  .tx-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .tx-row:last-child{margin-bottom:0;}
+  .tx-key{font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);letter-spacing:0.08em;}
+  .tx-val{font-family:'Space Mono',monospace;font-size:9px;color:var(--t1);font-weight:700;}
+  .actions{padding:14px 20px;flex:1;overflow-y:auto;}
+  .actions::-webkit-scrollbar{display:none;}
+  .actions-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.18em;margin-bottom:10px;}
+  .action{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid;cursor:pointer;}
+  .action.critical{background:rgba(255,59,48,0.06);border-color:rgba(255,59,48,0.2);}
+  .action.high{background:rgba(245,166,35,0.06);border-color:rgba(245,166,35,0.2);}
+  .action.medium{background:rgba(61,255,160,0.04);border-color:rgba(61,255,160,0.15);}
+  .action-num{font-family:'Space Mono',monospace;font-weight:700;font-size:11px;width:20px;flex-shrink:0;padding-top:1px;}
+  .action.critical .action-num{color:var(--danger);}
+  .action.high .action-num{color:var(--warn);}
+  .action.medium .action-num{color:var(--accent);}
+  .action-content{flex:1;}
+  .action-label{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:3px;}
+  .action-desc{font-size:11px;color:var(--t2);line-height:1.5;}
+  .action-arrow{font-size:12px;color:var(--t3);padding-top:2px;}
+  .handled-btn{margin:0 20px 16px;padding:13px;border-radius:10px;background:var(--s2);border:1px solid var(--border);color:var(--t2);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;text-align:center;}
+</style>
+</head>
+<body>
+<div class="label">VIGIL BY RANGE · 04 — ACT NOW MODAL</div>
+<div class="phone">
+  <div class="notch"><div class="notch-bar"></div></div>
+  <div class="screen">
+    <div class="status"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+
+    <div class="modal">
+      <div class="handle"></div>
+
+      <div class="risk-header">
+        <div class="risk-indicator">
+          <div class="risk-icon">🚨</div>
+          <div>
+            <div class="risk-label">HIGH RISK</div>
+            <div class="risk-score-row">
+              <div class="risk-bar-wrap"><div class="risk-bar"></div></div>
+              <span class="risk-score-num">8.2 / 10</span>
+            </div>
+          </div>
+        </div>
+        <div class="tx-box">
+          <div class="tx-row"><span class="tx-key">DIRECTION</span><span class="tx-val" style="color:var(--danger);">↑ OUTGOING</span></div>
+          <div class="tx-row"><span class="tx-key">AMOUNT</span><span class="tx-val">2,500 USDC</span></div>
+          <div class="tx-row"><span class="tx-key">NETWORK</span><span class="tx-val">Ethereum</span></div>
+          <div class="tx-row"><span class="tx-key">TO</span><span class="tx-val">0x7f26...38E5</span></div>
+          <div class="tx-row" style="margin-bottom:0;"><span class="tx-key">OFAC</span><span class="tx-val" style="color:var(--danger);">⚠ SANCTIONED</span></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-title">RECOMMENDED ACTIONS</div>
+
+        <div class="action critical">
+          <div class="action-num">01</div>
+          <div class="action-content">
+            <div class="action-label">🔒 Revoke token approvals</div>
+            <div class="action-desc">Open revoke.cash to remove unlimited approvals on this wallet immediately.</div>
+          </div>
+          <div class="action-arrow">→</div>
+        </div>
+
+        <div class="action critical">
+          <div class="action-num">02</div>
+          <div class="action-content">
+            <div class="action-label">🛑 Do not interact further</div>
+            <div class="action-desc">This address is OFAC sanctioned. Do not send funds back or reply.</div>
+          </div>
+          <div class="action-arrow">→</div>
+        </div>
+
+        <div class="action high">
+          <div class="action-num">03</div>
+          <div class="action-content">
+            <div class="action-label">🏃 Move clean funds out</div>
+            <div class="action-desc">Transfer remaining balance to a different wallet before further use.</div>
+          </div>
+          <div class="action-arrow">→</div>
+        </div>
+
+        <div class="action medium">
+          <div class="action-num">04</div>
+          <div class="action-content">
+            <div class="action-label">🔍 SafeSend check</div>
+            <div class="action-desc">Run full risk report on 0x7f26... before any further interaction.</div>
+          </div>
+          <div class="action-arrow" style="color:var(--accent);">→</div>
+        </div>
+      </div>
+
+      <div class="handled-btn">✓ Mark as Handled</div>
+    </div>
+  </div>
+  <div class="home-bar"><div class="home-line"></div></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vigil — 03 Alerts Tab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080808;--s1:#111111;--s2:#181818;--border:#242424;--accent:#3DFFA0;--accent-10:rgba(61,255,160,0.10);--warn:#F5A623;--danger:#FF3B30;--crit:#FF2D55;--t1:#FFFFFF;--t2:#888888;--t3:#444444;--eth:#627EEA;--sol:#9945FF;--trx:#FF4040;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#050505;font-family:'Inter',sans-serif;color:var(--t1);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  .label{font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;letter-spacing:0.2em;margin-bottom:20px;text-align:center;}
+  .phone{width:390px;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:44px;overflow:hidden;box-shadow:0 0 0 1px #333 inset,0 40px 100px rgba(0,0,0,0.7);display:flex;flex-direction:column;}
+  .notch{height:34px;display:flex;align-items:center;justify-content:center;padding-top:8px;}
+  .notch-bar{width:120px;height:5px;background:#1e1e1e;border-radius:10px;}
+  .screen{flex:1;background:var(--bg);display:flex;flex-direction:column;min-height:780px;}
+  .home-bar{height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .home-line{width:120px;height:4px;background:#222;border-radius:10px;}
+  .status{display:flex;justify-content:space-between;padding:6px 20px;font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);}
+  .app-header{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 14px;border-bottom:1px solid var(--border);}
+  .wordmark{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;}
+  .badge-new{background:var(--danger);color:#fff;font-family:'Space Mono',monospace;font-weight:700;font-size:9px;border-radius:20px;padding:2px 7px;}
+  .scroll{flex:1;overflow-y:auto;padding-top:10px;padding-bottom:8px;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .sec-row{display:flex;align-items:center;justify-content:space-between;padding:4px 18px 8px;}
+  .sec-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:0.18em;}
+  .bn{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:8px;letter-spacing:0.08em;border-radius:4px;padding:2px 7px;border:1px solid;}
+  .br{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:8px;letter-spacing:0.1em;border-radius:4px;padding:2px 7px;border:1px solid;}
+  .r-low{color:var(--accent);background:rgba(61,255,160,0.10);border-color:rgba(61,255,160,0.3);}
+  .r-med{color:var(--warn);background:rgba(245,166,35,0.10);border-color:rgba(245,166,35,0.3);}
+  .r-high{color:var(--danger);background:rgba(255,59,48,0.10);border-color:rgba(255,59,48,0.3);}
+  .r-crit{color:var(--crit);background:rgba(255,45,85,0.10);border-color:rgba(255,45,85,0.3);}
+  .n-eth{color:#627EEA;background:rgba(98,126,234,0.10);border-color:rgba(98,126,234,0.3);}
+  .n-sol{color:#9945FF;background:rgba(153,69,255,0.10);border-color:rgba(153,69,255,0.3);}
+  .n-trx{color:#FF4040;background:rgba(255,64,64,0.10);border-color:rgba(255,64,64,0.3);}
+  .acard{margin:0 14px 10px;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+  .acard.urgent{border-color:rgba(255,59,48,0.35);box-shadow:0 0 20px rgba(255,59,48,0.06);}
+  .acard.sanctioned{border-color:rgba(255,45,85,0.4);}
+  .act-banner{background:linear-gradient(90deg,rgba(255,59,48,0.18),rgba(255,45,85,0.10));padding:7px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,59,48,0.2);}
+  .act-banner-crit{background:linear-gradient(90deg,rgba(255,45,85,0.18),rgba(255,45,85,0.08));}
+  .act-text{font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:var(--danger);letter-spacing:0.05em;}
+  .act-text-crit{color:var(--crit);}
+  .act-time{font-family:'Space Mono',monospace;font-size:8px;color:var(--t2);margin-left:auto;}
+  .act-preview{padding:8px 14px 10px;background:var(--s2);display:flex;flex-direction:column;gap:5px;}
+  .act-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(255,59,48,0.06);border:1px solid rgba(255,59,48,0.12);border-radius:8px;}
+  .act-row-label{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;}
+  .act-row-arrow{font-size:10px;color:var(--danger);}
+  .act-more{font-family:'Space Mono',monospace;font-size:8px;color:var(--t3);text-align:center;padding-top:2px;cursor:pointer;}
+  .abody{background:var(--s2);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+  .abody.bb{border-bottom:1px solid rgba(255,59,48,0.15);}
+  .aicon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .ainfo{flex:1;}
+  .atitle{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .new-pill{font-family:'Space Mono',monospace;font-size:7px;color:var(--accent);background:rgba(61,255,160,0.10);border:1px solid rgba(61,255,160,0.3);border-radius:3px;padding:1px 5px;letter-spacing:0.1em;}
+  .abadges{display:flex;gap:5px;}
+  .atime{font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);flex-shrink:0;}
+  .tab-bar{display:flex;border-top:1px solid var(--border);background:var(--s1);padding:6px 0 2px;margin-top:auto;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;}
+  .ti{font-size:18px;} .tl{font-family:'Space Mono',monospace;font-size:8px;color:var(--t3);letter-spacing:0.08em;}
+  .tab.on .tl{color:var(--accent);} .tab.on .ti{filter:drop-shadow(0 0 6px var(--accent));}
+</style>
+</head>
+<body>
+<div class="label">VIGIL BY RANGE · 03 — ALERTS TAB</div>
+<div class="phone">
+  <div class="notch"><div class="notch-bar"></div></div>
+  <div class="screen">
+    <div class="status"><span>9:41</span><span>●●●●  WiFi  🔋</span></div>
+    <div class="app-header">
+      <span class="wordmark">Alerts</span>
+      <span class="badge-new">3 new</span>
+    </div>
+
+    <div class="scroll">
+      <div class="sec-row"><span class="sec-label">TODAY</span></div>
+
+      <!-- ACT NOW — HIGH outgoing -->
+      <div class="acard urgent">
+        <div class="act-banner">
+          <span style="font-size:14px;">⚡</span>
+          <span class="act-text">ACT NOW</span>
+          <span class="act-time">2m ago</span>
+        </div>
+        <div class="abody bb">
+          <div class="aicon" style="background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.25);">↑</div>
+          <div class="ainfo">
+            <div class="atitle">Sent 2,500 USDC <span class="new-pill">NEW</span></div>
+            <div class="abadges"><span class="bn n-eth">ETH</span><span class="br r-high">HIGH</span></div>
+          </div>
+        </div>
+        <div class="act-preview">
+          <div class="act-row"><span class="act-row-label">🔒 Revoke token approvals</span><span class="act-row-arrow">→</span></div>
+          <div class="act-row"><span class="act-row-label">🔍 Check in SafeSend</span><span class="act-row-arrow">→</span></div>
+          <div class="act-more">+ 2 more actions · tap to open</div>
+        </div>
+      </div>
+
+      <!-- ACT NOW — CRITICAL sanctioned -->
+      <div class="acard sanctioned">
+        <div class="act-banner act-banner-crit">
+          <span style="font-size:14px;">🚨</span>
+          <span class="act-text act-text-crit">ACT NOW — SANCTIONED</span>
+          <span class="act-time">14m ago</span>
+        </div>
+        <div class="abody">
+          <div class="aicon" style="background:rgba(255,45,85,0.12);border:1px solid rgba(255,45,85,0.25);">↓</div>
+          <div class="ainfo">
+            <div class="atitle">Received 100 USDT</div>
+            <div class="abadges"><span class="bn n-eth">ETH</span><span class="br r-crit">CRITICAL</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Normal — LOW -->
+      <div class="acard">
+        <div class="abody">
+          <div class="aicon" style="background:rgba(61,255,160,0.08);border:1px solid rgba(61,255,160,0.15);">↓</div>
+          <div class="ainfo">
+            <div class="atitle">Received 18,000 USDC</div>
+            <div class="abadges"><span class="bn n-sol">SOL</span><span class="br r-low">LOW</span></div>
+          </div>
+          <span class="atime">1h ago</span>
+        </div>
+      </div>
+
+      <!-- Normal — MEDIUM -->
+      <div class="acard">
+        <div class="abody">
+          <div class="aicon" style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.15);">↑</div>
+          <div class="ainfo">
+            <div class="atitle">Sent 500 USDT</div>
+            <div class="abadges"><span class="bn n-trx">TRX</span><span class="br r-med">MEDIUM</span></div>
+          </div>
+          <span class="atime">2h ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab"><span class="ti">🛡</span><span class="tl">WALLETS</span></div>
+      <div class="tab on"><span class="ti">🔔</span><span class="tl">ALERTS</span></div>
+      <div class="tab"><span class="ti">✈️</span><span class="tl">SAFESEND</span></div>
+    </div>
+  </div>
+  <div class="home-bar"><div class="home-line"></div></div>
+</div>
+</body>
+</html>
