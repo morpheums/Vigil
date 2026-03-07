@@ -55,7 +55,7 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 - **Manifest**: hydra/tasks/TASK-002.md
 
 ### TASK-003: Expo mobile app scaffold with tab layout and pre-built hooks
-- **Status**: IN_PROGRESS
+- **Status**: IMPLEMENTED
 - **Group**: 1
 - **Depends on**: none
 - **Manifest**: hydra/tasks/TASK-003.md
@@ -120,7 +120,7 @@ Build the Vigil stablecoin wallet watchdog app: Node.js/Express backend with SQL
 
 ## Recovery Pointer
 - **Current Task:** TASK-003
-- **Last Action:** Claimed TASK-003, created branch hydra/TASK-003
-- **Next Action:** Create Expo app scaffold with create-expo-app
+- **Last Action:** TASK-003 IMPLEMENTED — Expo scaffold, 3 tabs, pre-built hooks/components, networks.ts, tsc clean
+- **Next Action:** Review TASK-003
 - **Last Checkpoint:** hydra/checkpoints/iteration-004.json
-- **Last Commit:** 8f3236b
+- **Last Commit:** pending
