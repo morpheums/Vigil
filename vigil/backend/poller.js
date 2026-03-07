@@ -42,9 +42,11 @@ async function pollWallets() {
         // Merge sanctions into riskInfo
         const mergedRisk = { ...riskInfo, ...sanctionsInfo };
 
-        // Insert seen transaction
+        // Insert seen transaction (skip if no tx hash)
+        const txHash = tx.hash || tx.tx_hash;
+        if (!txHash) continue;
         insertSeenTx(
-          wallet.id, tx.hash, tx.amount_usd, tx.direction,
+          wallet.id, txHash, tx.amount_usd, tx.direction,
           tx.token_symbol, tx.counterparty_address,
           mergedRisk.risk_level, mergedRisk.risk_score
         );

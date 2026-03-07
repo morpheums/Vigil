@@ -1,6 +1,17 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import VigilLogo from '../../components/VigilLogo';
+
+function HeaderTitle() {
+  return (
+    <View style={styles.headerTitle}>
+      <VigilLogo size={28} />
+      <Text style={styles.headerText}>VIGIL</Text>
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
@@ -22,7 +33,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Wallets',
+          headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{ ios: 'shield.fill', android: 'shield', web: 'shield' }}
@@ -30,6 +41,7 @@ export default function TabLayout() {
               size={24}
             />
           ),
+          tabBarLabel: 'Wallets',
         }}
       />
       <Tabs.Screen
@@ -61,3 +73,17 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  headerTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+});

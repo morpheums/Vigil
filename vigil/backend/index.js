@@ -114,11 +114,11 @@ app.post('/risk-check', async (req, res) => {
       range.checkSanctions(address, network)
     ]);
     res.json({
-      riskLevel: riskInfo.risk_level,
-      riskScore: riskInfo.risk_score,
-      reasoning: riskInfo.reasoning,
-      isSanctioned: sanctionsInfo.is_ofac_sanctioned,
-      isBlacklisted: sanctionsInfo.is_token_blacklisted,
+      riskLevel: riskInfo.riskLevel || riskInfo.risk_level || 'UNKNOWN',
+      riskScore: riskInfo.riskScore ?? riskInfo.risk_score ?? 0,
+      reasoning: riskInfo.reasoning || '',
+      isSanctioned: sanctionsInfo.is_ofac_sanctioned || false,
+      isBlacklisted: sanctionsInfo.is_token_blacklisted || false,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
