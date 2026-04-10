@@ -27,9 +27,11 @@ function isCritical(riskLevel: string): boolean {
   return riskLevel.toUpperCase() === 'CRITICAL';
 }
 
-function parseDirection(message: string): 'outgoing' | 'incoming' {
-  if (message.trim().startsWith('Sent')) return 'outgoing';
-  return 'incoming';
+function formatAlertTitle(alert: { direction: string | null; amount_usd: number | null; token_symbol: string | null }): string {
+  const dir = alert.direction === 'outgoing' ? 'Outgoing' : 'Incoming';
+  const amount = alert.amount_usd != null ? `$${alert.amount_usd.toLocaleString()}` : '';
+  const token = alert.token_symbol || '';
+  return `${dir} ${amount} ${token}`.trim();
 }
 
 function formatTimestamp(sentAt: string): string {
@@ -88,11 +90,14 @@ function NetworkBadge({ network }: { network?: string }) {
 export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemProps) {
   const actNow = isActNowLevel(alert.risk_level);
   const critical = isCritical(alert.risk_level);
-  const direction = parseDirection(alert.message);
+  const direction = alert.direction || 'incoming';
+  const title = formatAlertTitle(alert);
   const isUnread = alert.acknowledged === 0;
+  const dimStyle = alert.acknowledged === 1 ? { opacity: 0.5 } : undefined;
 
-  // Derive network from wallet_address heuristic or default
-  const network = (alert as any).wallet_network || undefined;
+  // Prefer counterparty network from actions, fall back to wallet network
+  const actionNetwork = alert.act_now_actions.find(a => (a as any).network);
+  const network = (actionNetwork as any)?.network || (alert as any).wallet_network || undefined;
 
   // -- ACT NOW mode (HIGH / CRITICAL) --
 
@@ -112,18 +117,15 @@ export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemP
     const bannerText = critical ? 'ACT NOW \u2014 SANCTIONED' : 'ACT NOW';
     const bannerTextColor = critical ? Colors.critical : Colors.danger;
 
-    // Icon box styles based on direction
+    // Icon box styles based on direction — always differentiate outgoing (red) vs incoming (green)
     const iconOutgoing = direction === 'outgoing';
-    const iconBg = critical
-      ? (iconOutgoing ? 'rgba(255,45,85,0.12)' : 'rgba(255,45,85,0.12)')
-      : (iconOutgoing ? 'rgba(255,59,48,0.12)' : 'rgba(61,255,160,0.08)');
-    const iconBorder = critical
-      ? (iconOutgoing ? 'rgba(255,45,85,0.25)' : 'rgba(255,45,85,0.25)')
-      : (iconOutgoing ? 'rgba(255,59,48,0.25)' : 'rgba(61,255,160,0.15)');
+    const iconBg = iconOutgoing ? 'rgba(255,59,48,0.18)' : 'rgba(61,255,160,0.18)';
+    const iconBorder = iconOutgoing ? 'rgba(255,59,48,0.35)' : 'rgba(61,255,160,0.35)';
+    const iconColor = iconOutgoing ? Colors.danger : Colors.accent;
 
     return (
       <TouchableOpacity
-        style={[styles.card, { borderColor: cardBorderColor }]}
+        style={[styles.card, { borderColor: cardBorderColor }, dimStyle]}
         onPress={() => onActNow(alert)}
         activeOpacity={0.8}
       >
@@ -143,11 +145,11 @@ export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemP
         {/* Body */}
         <View style={[styles.abody, !critical && styles.abodyBorderBottom]}>
           <View style={[styles.aicon, { backgroundColor: iconBg, borderColor: iconBorder }]}>
-            <Text style={styles.aiconText}>{iconOutgoing ? '\u2191' : '\u2193'}</Text>
+            <Text style={[styles.aiconText, { color: iconColor }]}>{iconOutgoing ? '\u2191' : '\u2193'}</Text>
           </View>
           <View style={styles.ainfo}>
             <View style={styles.atitleRow}>
-              <Text style={styles.atitle} numberOfLines={1}>{alert.message}</Text>
+              <Text style={styles.atitle} numberOfLines={1}>{title}</Text>
               {isUnread && (
                 <View style={styles.newPill}>
                   <Text style={styles.newPillText}>NEW</Text>
@@ -185,7 +187,7 @@ export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemP
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, dimStyle]}
       onPress={() => {
         if (isUnread) onAcknowledge(alert.id);
       }}
@@ -194,16 +196,18 @@ export default function AlertItem({ alert, onActNow, onAcknowledge }: AlertItemP
       <View style={styles.abody}>
         <View style={[styles.aicon, {
           backgroundColor: direction === 'outgoing'
-            ? 'rgba(245,166,35,0.08)'
-            : 'rgba(61,255,160,0.08)',
-          borderColor: direction === 'outgoing'
-            ? 'rgba(245,166,35,0.15)'
+            ? 'rgba(255,59,48,0.15)'
             : 'rgba(61,255,160,0.15)',
+          borderColor: direction === 'outgoing'
+            ? 'rgba(255,59,48,0.30)'
+            : 'rgba(61,255,160,0.30)',
         }]}>
-          <Text style={styles.aiconText}>{direction === 'outgoing' ? '\u2191' : '\u2193'}</Text>
+          <Text style={[styles.aiconText, {
+            color: direction === 'outgoing' ? Colors.danger : Colors.accent,
+          }]}>{direction === 'outgoing' ? '\u2191' : '\u2193'}</Text>
         </View>
         <View style={styles.ainfo}>
-          <Text style={styles.atitle} numberOfLines={1}>{alert.message}</Text>
+          <Text style={styles.atitle} numberOfLines={1}>{title}</Text>
           <View style={styles.abadges}>
             <NetworkBadge network={network} />
             <RiskBadge riskLevel={alert.risk_level} />
@@ -368,7 +372,7 @@ const styles = StyleSheet.create({
   actMore: {
     fontFamily: Fonts.spaceMono,
     fontSize: 8,
-    color: Colors.t2,
+    color: Colors.t1,
     textAlign: 'center',
     paddingTop: 2,
   },

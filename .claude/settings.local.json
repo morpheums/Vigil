@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3000/alerts | python3 -c \"import sys,json; alerts=json.load\\(sys.stdin\\); [print\\(a['message'][:100]\\) for a in alerts[:3]]\")",
+      "Bash(cd \"/Users/josemejia/Documents/Software Development/Range/vigil/mobile\" && npx expo install expo-clipboard)"
+    ]
+  }
+}

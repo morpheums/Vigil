@@ -4,6 +4,17 @@ const { buildActNowActions, fireAlert } = require('./alerts');
 const { calculateContagionScore } = require('./contagion');
 const { getWallets, getSeenTxHashes, insertSeenTx } = require('./db');
 
+function normalizeRiskLevel(raw) {
+  if (!raw) return 'UNKNOWN';
+  const upper = raw.toUpperCase();
+  if (upper.startsWith('VERY LOW') || upper.startsWith('VERY_LOW')) return 'VERY_LOW';
+  if (upper.startsWith('CRITICAL')) return 'CRITICAL';
+  if (upper.startsWith('HIGH')) return 'HIGH';
+  if (upper.startsWith('MEDIUM')) return 'MEDIUM';
+  if (upper.startsWith('LOW')) return 'LOW';
+  return 'UNKNOWN';
+}
+
 // Round-robin poller: one wallet per tick, spread evenly across the interval.
 // 5 wallets + 60s per-wallet interval = each wallet polled every 5 minutes,
 // but only 1-3 API calls per tick instead of 10-15 in a burst.
@@ -28,6 +39,17 @@ async function pollNextWallet() {
   console.log(`[Poller] Tick: wallet ${wallet.id} (${wallet.label || wallet.address.slice(0, 8) + '...'}) — rotation ${cycleCount}`);
 
   try {
+    // Update wallet's own address risk each tick
+    try {
+      const selfRisk = await getAddressRisk(wallet.address, wallet.network);
+      const level = normalizeRiskLevel(selfRisk.riskLevel || selfRisk.risk_level);
+      const score = selfRisk.riskScore ?? selfRisk.risk_score ?? 0;
+      const { getDb } = require('./db');
+      getDb().prepare('UPDATE wallets SET risk_level = ?, risk_score = ? WHERE id = ?').run(level, score, wallet.id);
+    } catch (e) {
+      console.error(`[Poller]   Self risk check failed:`, e.message);
+    }
+
     // Get recent payments (1 API call)
     const { payments } = await getAddressPayments(wallet.address, wallet.network, 25);
 
@@ -55,7 +77,12 @@ async function pollNextWallet() {
         console.error(`[Poller]   Risk check failed for ${tx.counterparty_address}:`, e.message);
       }
 
-      const mergedRisk = { ...riskInfo, ...sanctionsInfo };
+      const rawLevel = riskInfo.riskLevel || riskInfo.risk_level || 'UNKNOWN';
+      const mergedRisk = {
+        ...riskInfo,
+        ...sanctionsInfo,
+        risk_level: normalizeRiskLevel(rawLevel),
+      };
 
       // Store transaction
       const txHash = tx.hash || tx.tx_hash;
@@ -67,15 +94,14 @@ async function pollNextWallet() {
       );
 
       // Build Act Now actions and fire alert
-      const actNowActions = buildActNowActions(
-        { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
-        mergedRisk
-      );
-
-      await fireAlert(wallet,
-        { ...tx, counterparty: tx.counterparty_address, network: wallet.network },
-        mergedRisk, actNowActions
-      );
+      const txForAlert = {
+        ...tx,
+        counterparty: tx.counterparty_address,
+        network: wallet.network,
+        counterparty_network: tx.counterparty_network || wallet.network,
+      };
+      const actNowActions = buildActNowActions(txForAlert, mergedRisk);
+      await fireAlert(wallet, txForAlert, mergedRisk, actNowActions);
     }
 
     // Every 4th full rotation: recalculate contagion for this wallet

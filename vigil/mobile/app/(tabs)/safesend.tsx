@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 
 import NetworkChips from '../../components/NetworkChips';
 import { Colors, Fonts } from '../../constants/theme';
@@ -21,7 +21,8 @@ import {
 // -- Helpers ------------------------------------------------------------------
 
 function riskEmoji(level: string): string {
-  switch (level.toUpperCase()) {
+  switch (level.toUpperCase().replace(/_/g, ' ')) {
+    case 'VERY LOW':
     case 'LOW':
       return '\u{1F7E2}'; // green circle
     case 'MEDIUM':
@@ -36,7 +37,8 @@ function riskEmoji(level: string): string {
 }
 
 function getRiskColor(level: string): string {
-  switch (level.toUpperCase()) {
+  switch (level.toUpperCase().replace(/_/g, ' ')) {
+    case 'VERY LOW':
     case 'LOW':
       return Colors.accent;
     case 'MEDIUM':
@@ -46,7 +48,7 @@ function getRiskColor(level: string): string {
     case 'CRITICAL':
       return Colors.critical;
     default:
-      return Colors.t2;
+      return Colors.t1;
   }
 }
 
@@ -60,7 +62,8 @@ function getVerdictMessage(result: RiskCheckResult): string {
 }
 
 function getRiskHeaderBg(level: string): string {
-  switch (level.toUpperCase()) {
+  switch (level.toUpperCase().replace(/_/g, ' ')) {
+    case 'VERY LOW':
     case 'LOW':
       return 'rgba(61,255,160,0.12)';
     case 'MEDIUM':
@@ -75,7 +78,8 @@ function getRiskHeaderBg(level: string): string {
 }
 
 function getRiskBorderColor(level: string): string {
-  switch (level.toUpperCase()) {
+  switch (level.toUpperCase().replace(/_/g, ' ')) {
+    case 'VERY LOW':
     case 'LOW':
       return 'rgba(61,255,160,0.35)';
     case 'MEDIUM':
@@ -90,7 +94,8 @@ function getRiskBorderColor(level: string): string {
 }
 
 function getRiskVerdictBg(level: string): string {
-  switch (level.toUpperCase()) {
+  switch (level.toUpperCase().replace(/_/g, ' ')) {
+    case 'VERY LOW':
     case 'LOW':
       return 'rgba(61,255,160,0.12)';
     case 'MEDIUM':
@@ -108,11 +113,13 @@ function getRiskVerdictBg(level: string): string {
 
 export default function SafeSendScreen() {
   const api = useApi();
-  const params = useLocalSearchParams<{ address?: string }>();
+  const navigation = useNavigation();
+  const params = useLocalSearchParams<{ address?: string; network?: string }>();
 
   // Form state
   const [recipientAddress, setRecipientAddress] = useState('');
   const [network, setNetwork] = useState('');
+  const [networkLocked, setNetworkLocked] = useState(false);
   const [amountUsd, setAmountUsd] = useState('');
   const [senderAddress, setSenderAddress] = useState('');
 
@@ -124,12 +131,55 @@ export default function SafeSendScreen() {
     null,
   );
 
-  // Deep-link: pre-fill address from query param
+  // Track last consumed param to detect new deep-links vs stale ones
+  const lastConsumedParam = useRef('');
+
+  // Deep-link: pre-fill from query params
   useEffect(() => {
-    if (params.address) {
-      setRecipientAddress(params.address);
+    const paramKey = `${params.address || ''}:${params.network || ''}`;
+    if (paramKey !== ':' && paramKey !== lastConsumedParam.current) {
+      lastConsumedParam.current = paramKey;
+      if (params.address) {
+        setRecipientAddress(params.address);
+        const detected = detectNetwork(params.address);
+        if (detected) {
+          setNetwork(detected);
+          setNetworkLocked(true);
+        }
+      }
+      if (params.network) {
+        setNetwork(params.network);
+        setNetworkLocked(true);
+      }
+      setRiskResult(null);
+      setPaymentResult(null);
+      setError(null);
     }
-  }, [params.address]);
+  }, [params.address, params.network]);
+
+  // Reset form when tab is re-focused without new params
+  useEffect(() => {
+    let isFirstFocus = true;
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (isFirstFocus) {
+        isFirstFocus = false;
+        return;
+      }
+      // Only reset if no new params arrived (deep-link useEffect handles those)
+      const paramKey = `${params.address || ''}:${params.network || ''}`;
+      if (paramKey === ':' || paramKey === lastConsumedParam.current) {
+        setRecipientAddress('');
+        setNetwork('');
+        setNetworkLocked(false);
+        setAmountUsd('');
+        setSenderAddress('');
+        setRiskResult(null);
+        setPaymentResult(null);
+        setError(null);
+      }
+    });
+    return unsubscribe;
+  }, [navigation, params.address, params.network]);
 
   // Clear results when any input changes
   function clearResults() {
@@ -138,8 +188,28 @@ export default function SafeSendScreen() {
     setError(null);
   }
 
+  function detectNetwork(address: string): string | null {
+    const trimmed = address.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('0x') && trimmed.length === 42) return 'ethereum';
+    if (trimmed.startsWith('T') && trimmed.length === 34) return 'tron';
+    if (trimmed.startsWith('cosmos1')) return 'cosmoshub-4';
+    if (trimmed.startsWith('osmo1')) return 'osmosis-1';
+    if (trimmed.startsWith('G') && trimmed.length === 56) return 'stellar';
+    // Base58 without 0x prefix — likely Solana
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return 'solana';
+    return null;
+  }
+
   function onRecipientChange(text: string) {
     setRecipientAddress(text);
+    const detected = detectNetwork(text);
+    if (detected) {
+      setNetwork(detected);
+      setNetworkLocked(true);
+    } else {
+      setNetworkLocked(false);
+    }
     clearResults();
   }
 
@@ -242,11 +312,11 @@ export default function SafeSendScreen() {
 
           {/* Network */}
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>NETWORK</Text>
+            <Text style={styles.fieldLabel}>NETWORK{networkLocked ? '  ✓ AUTO-DETECTED' : ''}</Text>
             <NetworkChips
               layout="grid"
               selected={network}
-              onSelect={onNetworkChange}
+              onSelect={networkLocked ? () => {} : onNetworkChange}
             />
           </View>
 
@@ -311,16 +381,16 @@ export default function SafeSendScreen() {
                 { backgroundColor: riskHeaderBg, borderBottomColor: riskBorderColor },
               ]}
             >
-              <View>
-                <Text style={[styles.resultRisk, { color: riskColor }]}>
-                  {riskEmoji(riskResult.riskLevel)}{' '}
-                  {riskResult.riskLevel.toUpperCase()} RISK
-                </Text>
-                <Text style={styles.resultSubtext}>Counterparty risk score</Text>
-              </View>
-              <Text style={styles.resultScore}>
-                {riskResult.riskScore} / 10
+              <Text style={[styles.resultRisk, { color: riskColor }]}>
+                {riskEmoji(riskResult.riskLevel)}{' '}
+                {riskResult.riskLevel.replace(/_/g, ' ').toUpperCase()} RISK
               </Text>
+              <View style={styles.resultScoreRow}>
+                <Text style={styles.resultSubtext}>Counterparty risk score</Text>
+                <Text style={[styles.resultScore, { color: riskColor }]}>
+                  {riskResult.riskScore} / 10
+                </Text>
+              </View>
             </View>
 
             {/* Body rows */}
@@ -500,28 +570,29 @@ const styles = StyleSheet.create({
   resultHeader: {
     paddingVertical: 14,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     borderBottomWidth: 1,
   },
   resultRisk: {
     fontFamily: Fonts.syneExtraBold,
     fontSize: 22,
-    lineHeight: 24,
+    lineHeight: 26,
     letterSpacing: -0.4,
+  },
+  resultScoreRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
   },
   resultSubtext: {
     fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: Colors.t2,
-    marginTop: 4,
+    color: Colors.t1,
   },
   resultScore: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
     fontSize: 13,
-    color: Colors.t2,
   },
 
   // Result body
@@ -541,7 +612,7 @@ const styles = StyleSheet.create({
   resultKey: {
     fontFamily: Fonts.spaceMono,
     fontSize: 9,
-    color: Colors.t2,
+    color: Colors.t1,
     letterSpacing: 1,
   },
   resultVal: {
@@ -556,7 +627,7 @@ const styles = StyleSheet.create({
   reasoning: {
     fontFamily: Fonts.interRegular,
     fontSize: 11,
-    color: Colors.t2,
+    color: Colors.t1,
     lineHeight: 22,
     paddingVertical: 10,
     borderBottomWidth: 1,

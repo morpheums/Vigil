@@ -21,6 +21,18 @@ import { Colors, Fonts, Radii } from '../../constants/theme';
 import WalletCard from '../../components/WalletCard';
 import NetworkChips from '../../components/NetworkChips';
 
+function detectNetwork(addr: string): string | null {
+  const trimmed = addr.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('0x') && trimmed.length === 42) return 'ethereum';
+  if (trimmed.startsWith('T') && trimmed.length === 34) return 'tron';
+  if (trimmed.startsWith('cosmos1')) return 'cosmoshub-4';
+  if (trimmed.startsWith('osmo1')) return 'osmosis-1';
+  if (trimmed.startsWith('G') && trimmed.length === 56) return 'stellar';
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return 'solana';
+  return null;
+}
+
 export default function WalletsScreen() {
   const api = useApi();
   const router = useRouter();
@@ -33,7 +45,8 @@ export default function WalletsScreen() {
 
   // Form state
   const [address, setAddress] = useState('');
-  const [network, setNetwork] = useState(NETWORKS[0].id);
+  const [network, setNetwork] = useState('');
+  const [networkLocked, setNetworkLocked] = useState(false);
   const [label, setLabel] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -46,7 +59,7 @@ export default function WalletsScreen() {
           <View style={styles.pulse} />
           <TouchableOpacity
             style={styles.addBtn}
-            onPress={() => bottomSheetRef.current?.present()}
+            onPress={() => { resetForm(); bottomSheetRef.current?.present(); }}
             activeOpacity={0.8}
           >
             <Text style={styles.addBtnText}>+ Add</Text>
@@ -67,7 +80,18 @@ export default function WalletsScreen() {
 
   useEffect(() => {
     loadWallets().finally(() => setLoading(false));
+
+    const interval = setInterval(loadWallets, 10000);
+    return () => clearInterval(interval);
   }, []);
+
+  // Refresh wallets when tab is focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadWallets();
+    });
+    return unsubscribe;
+  }, [navigation, loadWallets]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -77,7 +101,8 @@ export default function WalletsScreen() {
 
   const resetForm = () => {
     setAddress('');
-    setNetwork(NETWORKS[0].id);
+    setNetwork('');
+    setNetworkLocked(false);
     setLabel('');
     setEmail('');
   };
@@ -180,7 +205,16 @@ export default function WalletsScreen() {
               placeholder="0x742d35Cc6634C0532925a3b..."
               placeholderTextColor={Colors.t2}
               value={address}
-              onChangeText={setAddress}
+              onChangeText={(text) => {
+                setAddress(text);
+                const detected = detectNetwork(text);
+                if (detected) {
+                  setNetwork(detected);
+                  setNetworkLocked(true);
+                } else {
+                  setNetworkLocked(false);
+                }
+              }}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -191,8 +225,8 @@ export default function WalletsScreen() {
 
           {/* Network Picker */}
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>NETWORK</Text>
-            <NetworkChips layout="grid" selected={network} onSelect={setNetwork} />
+            <Text style={styles.fieldLabel}>NETWORK{networkLocked ? '  ✓ AUTO-DETECTED' : ''}</Text>
+            <NetworkChips layout="grid" selected={network} onSelect={networkLocked ? () => {} : setNetwork} />
           </View>
 
           {/* Label */}

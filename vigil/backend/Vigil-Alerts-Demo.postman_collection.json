@@ -1,0 +1,163 @@
+{
+	"info": {
+		"_postman_id": "vigil-alerts-demo-2026",
+		"name": "Vigil — Alerts Demo (Range-Powered)",
+		"description": "Demo collection for Vigil alerts. Each request fires a real alert using live Range blockchain intelligence API data.\n\nThe fire-alert endpoint:\n1. Fetches real counterparties from Range's address connections\n2. Runs live risk scoring via Range's get_address_risk\n3. Checks OFAC sanctions via Range's check_sanctions\n4. Generates an alert with real data through the full alert pipeline",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": ["{{baseUrl}}"],
+					"path": ["health"]
+				},
+				"description": "Verify the backend is running and connected to Range API."
+			}
+		},
+		{
+			"name": "2. List Wallets",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/wallets",
+					"host": ["{{baseUrl}}"],
+					"path": ["wallets"]
+				},
+				"description": "Get all watched wallets. Use the `id` field to fire alerts on specific wallets."
+			}
+		},
+		{
+			"name": "3. Fire Alert — Ethereum (Lazarus Group)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": 2,\n    \"scenario\": \"high\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/debug/fire-alert",
+					"host": ["{{baseUrl}}"],
+					"path": ["debug", "fire-alert"]
+				},
+				"description": "Fires a real alert on the Lazarus Group (Ethereum) wallet.\n\nRange API calls made:\n- get_address_connections → finds real counterparties\n- get_address_risk → scores the counterparty\n- check_sanctions → checks OFAC status\n\nThe alert appears in the mobile app immediately."
+			}
+		},
+		{
+			"name": "4. Fire Alert — Tron (OFAC Sanctioned)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": 5,\n    \"scenario\": \"high\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/debug/fire-alert",
+					"host": ["{{baseUrl}}"],
+					"path": ["debug", "fire-alert"]
+				},
+				"description": "Fires a real alert on the OFAC Sanctioned (Tron) wallet.\n\nThis wallet is known to transact with sanctioned entities — Range's sanctions check may flag counterparties."
+			}
+		},
+		{
+			"name": "5. Fire Alert — Solana (High Risk)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": 6,\n    \"scenario\": \"high\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/debug/fire-alert",
+					"host": ["{{baseUrl}}"],
+					"path": ["debug", "fire-alert"]
+				},
+				"description": "Fires a real alert on the Solana High Risk wallet.\n\nDemonstrates cross-chain coverage — Range provides intelligence across Ethereum, Solana, Tron, Cosmos, and more."
+			}
+		},
+		{
+			"name": "6. Fire Alert — Clean Incoming",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"walletId\": 3,\n    \"scenario\": \"incoming_clean\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/debug/fire-alert",
+					"host": ["{{baseUrl}}"],
+					"path": ["debug", "fire-alert"]
+				},
+				"description": "Fires an incoming transaction alert on Clean Tron Wallet.\n\nShows that Vigil monitors both directions and correctly identifies low-risk activity."
+			}
+		},
+		{
+			"name": "7. View Alerts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/alerts?limit=10",
+					"host": ["{{baseUrl}}"],
+					"path": ["alerts"],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				},
+				"description": "View the most recent alerts. Each alert contains:\n- Real risk level and score from Range\n- Real counterparty address and network\n- Recommended actions (revoke approvals, check in SafeSend, etc.)"
+			}
+		},
+		{
+			"name": "8. Acknowledge Alert",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/alerts/1/acknowledge",
+					"host": ["{{baseUrl}}"],
+					"path": ["alerts", "1", "acknowledge"]
+				},
+				"description": "Mark an alert as handled. Replace `1` with the actual alert ID from the View Alerts response."
+			}
+		}
+	]
+}

@@ -10,9 +10,27 @@ const RISK_WEIGHTS = {
   UNKNOWN: 2,
 };
 
+// Normalize Range API risk levels like "VERY LOW RISK", "CRITICAL RISK (directly malicious)" etc.
+function normalizeRiskLevel(raw) {
+  if (!raw) return 'UNKNOWN';
+  const upper = raw.toUpperCase();
+  if (upper.startsWith('VERY LOW') || upper.startsWith('VERY_LOW')) return 'VERY_LOW';
+  if (upper.startsWith('CRITICAL')) return 'CRITICAL';
+  if (upper.startsWith('HIGH')) return 'HIGH';
+  if (upper.startsWith('MEDIUM')) return 'MEDIUM';
+  if (upper.startsWith('LOW')) return 'LOW';
+  return 'UNKNOWN';
+}
+
 async function calculateContagionScore(walletId, address, network) {
   // 1. Get up to 15 counterparties
-  const { connections } = await getAddressConnections(address, network, 15);
+  const raw = await getAddressConnections(address, network, 15);
+  const connections = (raw.nodes || []).map(n => ({
+    address: n.address?.address || n.address,
+    network: n.address?.network || network,
+    label: n.address?.label || null,
+    transfer_count: n.total_payments || 1,
+  }));
 
   // 2. Risk-score ALL counterparties in parallel
   const riskResults = await Promise.all(
@@ -21,15 +39,19 @@ async function calculateContagionScore(walletId, address, network) {
     )
   );
 
-  // 3. Build scored nodes
-  const nodes = connections.map((c, i) => ({
-    address: c.address,
-    network: c.network,
-    riskLevel: riskResults[i]?.risk_level || 'UNKNOWN',
-    riskScore: riskResults[i]?.risk_score || 0,
-    label: c.label || null,
-    transferCount: c.transfer_count || 1,
-  }));
+  // 3. Build scored nodes — normalize risk level field names
+  const nodes = connections.map((c, i) => {
+    const r = riskResults[i];
+    const knownLevel = normalizeRiskLevel(r?.riskLevel || r?.risk_level);
+    return {
+      address: c.address,
+      network: c.network,
+      riskLevel: knownLevel,
+      riskScore: r?.riskScore ?? r?.risk_score ?? 0,
+      label: c.label,
+      transferCount: c.transfer_count,
+    };
+  });
 
   // 4. Weighted average
   const totalWeight = nodes.reduce((s, n) => s + n.transferCount, 0);

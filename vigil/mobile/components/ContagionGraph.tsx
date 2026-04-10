@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import Svg, { Circle, Line, Text as SvgText, G, Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ export default function ContagionGraph({
   rootAddress,
   onNodePress,
 }: ContagionGraphProps) {
+  const router = useRouter();
   const [selectedNode, setSelectedNode] = useState<ContagionNode | null>(null);
 
   const WIDTH  = Dimensions.get('window').width - 36; // 18px padding each side
@@ -232,7 +234,16 @@ export default function ContagionGraph({
             <Text style={styles.tooltipLabel}>TRANSFERS</Text>
             <Text style={styles.tooltipValue}>{selectedNode.transferCount}</Text>
           </View>
-          <TouchableOpacity style={styles.tooltipCTA}>
+          <TouchableOpacity
+            style={styles.tooltipCTA}
+            onPress={() => {
+              if (selectedNode) {
+                setSelectedNode(null);
+                router.push(`/(tabs)/safesend?address=${selectedNode.address}&network=${selectedNode.network}`);
+              }
+            }}
+            activeOpacity={0.7}
+          >
             <Text style={styles.tooltipCTAText}>Check in SafeSend →</Text>
           </TouchableOpacity>
         </View>
@@ -271,7 +282,7 @@ const styles = StyleSheet.create({
   tooltipLabel: {
     fontFamily: 'SpaceMono',
     fontSize: 9,
-    color: '#555',
+    color: '#999',
     letterSpacing: 0.8,
   },
   tooltipValue: {

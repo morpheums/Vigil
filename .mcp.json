@@ -2,7 +2,16 @@
   "mcpServers": {
     "hydra-notifications": {
       "command": "node",
-      "args": ["/Users/josemejia/Documents/Software Development/ai-hydra-framework/mcp-server/dist/index.js"]
+      "args": [
+        "/Users/josemejia/Documents/Software Development/ai-hydra-framework/mcp-server/dist/index.js"
+      ]
+    },
+    "range": {
+      "type": "http",
+      "url": "https://api.range.org/ai/mcp",
+      "headers": {
+        "Authorization": "Bearer {{RANGE_API_KEY}}"
+      }
     }
   }
 }

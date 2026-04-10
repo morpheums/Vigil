@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useApi, Wallet, ContagionResult } from '../hooks/useApi';
+import { useApi, Wallet, ContagionResult, Transaction } from '../hooks/useApi';
 import { Colors, Fonts, Radii } from '../constants/theme';
 import { NETWORKS } from '../constants/networks';
 import ContagionGraph from '../components/ContagionGraph';
@@ -26,6 +26,17 @@ function contagionColor(score: number): string {
   if (score < 6) return Colors.warn;
   if (score < 8) return Colors.danger;
   return Colors.critical;
+}
+
+function riskColorForLevel(level: string): string {
+  switch (level) {
+    case 'VERY_LOW': return Colors.accent;
+    case 'LOW': return Colors.accent;
+    case 'MEDIUM': return Colors.warn;
+    case 'HIGH': return Colors.danger;
+    case 'CRITICAL': return Colors.critical;
+    default: return Colors.t2;
+  }
 }
 
 function riskLevel(score: number): string {
@@ -54,6 +65,7 @@ export default function WalletDetailScreen() {
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [contagion, setContagion] = useState<ContagionResult | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshingContagion, setRefreshingContagion] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -72,8 +84,19 @@ export default function WalletDetailScreen() {
       }
       setWallet(found);
 
-      const contagionData = await api.getContagion(numericId);
-      setContagion(contagionData);
+      try {
+        const contagionData = await api.getContagion(numericId);
+        setContagion(contagionData);
+      } catch (_) {
+        setContagion(null);
+      }
+
+      try {
+        const txs = await api.getTransactions(numericId, 5);
+        setTransactions(txs);
+      } catch (_) {
+        setTransactions([]);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load wallet data.');
     }
@@ -152,6 +175,9 @@ export default function WalletDetailScreen() {
   const networkSymbol = networkInfo?.symbol || wallet.network.toUpperCase();
   const score = contagion?.contagionScore ?? 0;
   const scoreColor = contagionColor(score);
+  const addrRisk = wallet.risk_level || 'UNKNOWN';
+  const addrRiskScore = wallet.risk_score ?? 0;
+  const addrRiskColor = riskColorForLevel(addrRisk);
 
   return (
     <View style={styles.container}>
@@ -180,15 +206,17 @@ export default function WalletDetailScreen() {
               </Text>
             </View>
             {/* Risk badge */}
-            <RiskBadge riskLevel={riskLevel(score)} />
+            <RiskBadge riskLevel={addrRisk} />
           </View>
           <Text style={styles.detailAddr}>{wallet.address}</Text>
 
           {/* Stats grid */}
           <View style={styles.statsGrid}>
             <View style={styles.stat}>
-              <Text style={styles.statVal}>N/A</Text>
-              <Text style={styles.statKey}>BALANCE</Text>
+              <Text style={[styles.statVal, { color: addrRiskColor }]}>
+                {addrRiskScore}
+              </Text>
+              <Text style={styles.statKey}>RISK</Text>
             </View>
             <View style={styles.stat}>
               <Text style={[styles.statVal, { color: scoreColor }]}>
@@ -259,15 +287,49 @@ export default function WalletDetailScreen() {
           </View>
         )}
 
-        {/* Recent Transactions placeholder */}
+        {/* Recent Transactions */}
         <View style={styles.txSectionHeader}>
           <Text style={styles.txSectionLabel}>RECENT TRANSACTIONS</Text>
         </View>
-        <View style={styles.txPlaceholder}>
-          <Text style={styles.txPlaceholderText}>
-            Transaction history coming soon
-          </Text>
-        </View>
+        {transactions.length > 0 ? (
+          <View style={styles.txList}>
+            {transactions.map((tx) => {
+              const isOut = tx.direction === 'outgoing';
+              const dirColor = isOut ? Colors.danger : Colors.accent;
+              const riskColor = riskColorForLevel(tx.risk_level || 'UNKNOWN');
+              return (
+                <View key={tx.id} style={styles.txRow}>
+                  <View style={[styles.txDirIcon, { backgroundColor: dirColor + '1A', borderColor: dirColor + '40' }]}>
+                    <Text style={[styles.txDirArrow, { color: dirColor }]}>{isOut ? '\u2191' : '\u2193'}</Text>
+                  </View>
+                  <View style={styles.txInfo}>
+                    <Text style={styles.txAmount} numberOfLines={1}>
+                      {tx.amount_usd != null ? `$${tx.amount_usd.toLocaleString()}` : '—'}{' '}
+                      {tx.token_symbol || ''}
+                    </Text>
+                    <Text style={styles.txCounterparty} numberOfLines={1}>
+                      {tx.counterparty ? truncateAddress(tx.counterparty) : tx.tx_hash ? truncateAddress(tx.tx_hash) : '—'}
+                    </Text>
+                  </View>
+                  <View style={styles.txRight}>
+                    {tx.risk_level && tx.risk_level !== 'UNKNOWN' && (
+                      <Text style={[styles.txRisk, { color: riskColor }]}>
+                        {tx.risk_level.replace(/_/g, ' ')}
+                      </Text>
+                    )}
+                    <Text style={styles.txTime}>{relativeTime(tx.seen_at)}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.txPlaceholder}>
+            <Text style={styles.txPlaceholderText}>
+              No transactions recorded yet
+            </Text>
+          </View>
+        )}
 
         {/* Delete Wallet Button */}
         <TouchableOpacity
@@ -464,6 +526,67 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.t2,
     letterSpacing: 1.8,
+  },
+  txList: {
+    marginHorizontal: 18,
+    marginTop: 8,
+    marginBottom: 20,
+    backgroundColor: Colors.s2,
+    borderRadius: Radii.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: 'hidden',
+  },
+  txRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  txDirIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  txDirArrow: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  txInfo: {
+    flex: 1,
+  },
+  txAmount: {
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 12,
+    color: Colors.t1,
+    marginBottom: 2,
+  },
+  txCounterparty: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 10,
+    color: Colors.t2,
+  },
+  txRight: {
+    alignItems: 'flex-end',
+  },
+  txRisk: {
+    fontFamily: Fonts.spaceMono,
+    fontWeight: '700',
+    fontSize: 9,
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  txTime: {
+    fontFamily: Fonts.spaceMono,
+    fontSize: 9,
+    color: Colors.t2,
   },
   txPlaceholder: {
     marginHorizontal: 18,

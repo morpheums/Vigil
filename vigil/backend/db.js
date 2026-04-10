@@ -8,7 +8,22 @@ function createDb(dbPath) {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   initTables(db);
+  migrate(db);
   return db;
+}
+
+function migrate(db) {
+  // Add risk columns to wallets if missing
+  const cols = db.prepare("PRAGMA table_info(wallets)").all().map(c => c.name);
+  if (!cols.includes('risk_level')) {
+    db.exec("ALTER TABLE wallets ADD COLUMN risk_level TEXT DEFAULT NULL");
+  }
+  if (!cols.includes('risk_score')) {
+    db.exec("ALTER TABLE wallets ADD COLUMN risk_score REAL DEFAULT NULL");
+  }
+  if (!cols.includes('last_activity')) {
+    db.exec("ALTER TABLE wallets ADD COLUMN last_activity DATETIME DEFAULT NULL");
+  }
 }
 
 function initTables(db) {
@@ -46,6 +61,11 @@ function initTables(db) {
       tx_hash TEXT NOT NULL,
       message TEXT,
       risk_level TEXT,
+      risk_score REAL,
+      direction TEXT,
+      amount_usd REAL,
+      token_symbol TEXT,
+      counterparty TEXT,
       act_now_actions TEXT,
       channels TEXT,
       acknowledged INTEGER DEFAULT 0,
@@ -100,9 +120,16 @@ function insertWallet(address, network, label, expoPushToken, alertEmail) {
 function getWallets() {
   const db = getDb();
   return db.prepare(`
-    SELECT w.*, MAX(st.seen_at) AS last_activity
+    SELECT w.*,
+      MAX(st.seen_at) AS last_activity,
+      lt.amount_usd AS last_tx_amount,
+      lt.token_symbol AS last_tx_token,
+      lt.direction AS last_tx_direction
     FROM wallets w
     LEFT JOIN seen_transactions st ON st.wallet_id = w.id
+    LEFT JOIN seen_transactions lt ON lt.id = (
+      SELECT id FROM seen_transactions WHERE wallet_id = w.id ORDER BY seen_at DESC LIMIT 1
+    )
     GROUP BY w.id
     ORDER BY w.created_at DESC
   `).all();
@@ -136,24 +163,34 @@ function getSeenTxHashes(walletId) {
   return rows.map(r => r.tx_hash);
 }
 
+function getRecentTransactions(walletId, limit = 5) {
+  const db = getDb();
+  return db.prepare(`
+    SELECT * FROM seen_transactions
+    WHERE wallet_id = ?
+    ORDER BY seen_at DESC
+    LIMIT ?
+  `).all(walletId, limit);
+}
+
 // --- Alert helpers ---
 
-function insertAlert(walletId, txHash, message, riskLevel, actNowActions, channels) {
+function insertAlert(walletId, txHash, message, riskLevel, riskScore, direction, amountUsd, tokenSymbol, counterparty, actNowActions, channels) {
   const db = getDb();
   const stmt = db.prepare(`
-    INSERT INTO alert_log (wallet_id, tx_hash, message, risk_level, act_now_actions, channels)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO alert_log (wallet_id, tx_hash, message, risk_level, risk_score, direction, amount_usd, token_symbol, counterparty, act_now_actions, channels)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const actionsJson = typeof actNowActions === 'string' ? actNowActions : JSON.stringify(actNowActions);
   const channelsJson = typeof channels === 'string' ? channels : JSON.stringify(channels);
-  const result = stmt.run(walletId, txHash, message, riskLevel, actionsJson, channelsJson);
+  const result = stmt.run(walletId, txHash, message, riskLevel, riskScore ?? null, direction ?? null, amountUsd ?? null, tokenSymbol ?? null, counterparty ?? null, actionsJson, channelsJson);
   return result.lastInsertRowid;
 }
 
 function getAlerts(limit = 50, walletId = null) {
   const db = getDb();
   const baseQuery = `
-    SELECT a.*, w.label AS wallet_label, w.address AS wallet_address
+    SELECT a.*, w.label AS wallet_label, w.address AS wallet_address, w.network AS wallet_network
     FROM alert_log a
     LEFT JOIN wallets w ON w.id = a.wallet_id
   `;
@@ -219,6 +256,7 @@ module.exports = {
   deleteWallet,
   insertSeenTx,
   getSeenTxHashes,
+  getRecentTransactions,
   insertAlert,
   getAlerts,
   acknowledgeAlert,

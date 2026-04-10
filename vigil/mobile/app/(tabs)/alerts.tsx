@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApi, Alert, ActNowAction } from '../../hooks/useApi';
-import AlertItem from '../../components/AlertItem';
+import SwipeableAlertItem from '../../components/SwipeableAlertItem';
 import ActNowCard from '../../components/ActNowCard';
 import { Colors, Fonts, Spacing, Radii } from '../../constants/theme';
 
@@ -70,6 +70,10 @@ export default function AlertsScreen() {
       await fetchAlerts();
       setLoading(false);
     })();
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchAlerts, 5000);
+    return () => clearInterval(interval);
   }, [fetchAlerts]);
 
   const onRefresh = useCallback(async () => {
@@ -87,7 +91,7 @@ export default function AlertsScreen() {
   const sections = useMemo(() => {
     const groups: Record<string, Alert[]> = {};
     const order = ['TODAY', 'YESTERDAY', 'EARLIER'];
-    alerts.forEach((a) => {
+    alerts.filter((a) => a.acknowledged === 0).forEach((a) => {
       const group = getDateGroup(a.sent_at);
       if (!groups[group]) groups[group] = [];
       groups[group].push(a);
@@ -109,9 +113,9 @@ export default function AlertsScreen() {
 
   const handleActionPress = useCallback((action: ActNowAction): boolean => {
     if (action.id === 'safesend_check' && action.counterparty) {
-      // Close the modal, then navigate to SafeSend with the address pre-filled
       handleCloseActNow();
-      router.push(`/safesend?address=${action.counterparty}`);
+      const network = (action as any).network || '';
+      router.push(`/(tabs)/safesend?address=${action.counterparty}&network=${network}`);
       return true; // handled — skip default Linking behavior
     }
     return false;
@@ -132,7 +136,7 @@ export default function AlertsScreen() {
   // ── Render helpers ─────────────────────────────────────────────────────
 
   const renderItem = ({ item }: { item: Alert }) => (
-    <AlertItem
+    <SwipeableAlertItem
       alert={item}
       onActNow={handleActNow}
       onAcknowledge={handleAcknowledge}

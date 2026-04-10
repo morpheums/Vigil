@@ -27,6 +27,13 @@ function formatTimestamp(iso: string): string {
   return date.toLocaleDateString();
 }
 
+function formatAmount(amount: number): string {
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
+  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(1)}K`;
+  if (amount < 0.01) return `${amount.toFixed(4)}`;
+  return `$${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
+
 function contagionColor(score: number): string {
   if (score < 4) return Colors.accent;
   if (score < 6) return Colors.warn;
@@ -48,6 +55,28 @@ function contagionLabel(score: number): string {
   return 'No risks detected';
 }
 
+function addressRiskColor(level: string): string {
+  switch (level) {
+    case 'VERY_LOW': return Colors.accent;
+    case 'LOW': return Colors.accent;
+    case 'MEDIUM': return Colors.warn;
+    case 'HIGH': return Colors.danger;
+    case 'CRITICAL': return Colors.critical;
+    default: return Colors.t2;
+  }
+}
+
+function addressRiskLabel(level: string): string {
+  switch (level) {
+    case 'VERY_LOW': return 'Very low risk';
+    case 'LOW': return 'Low risk';
+    case 'MEDIUM': return 'Moderate risk';
+    case 'HIGH': return 'High risk';
+    case 'CRITICAL': return 'Critical threat';
+    default: return 'Unknown';
+  }
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 interface WalletCardProps {
@@ -60,7 +89,8 @@ export default function WalletCard({ wallet, onPress, isActive = false }: Wallet
   const network = NETWORK_MAP[wallet.network];
   const displayName = wallet.label || truncateAddress(wallet.address);
   const score = wallet.contagion_score;
-  const riskLevel = deriveRiskLevel(score);
+  const addressRisk = wallet.risk_level || 'UNKNOWN';
+  const riskLevel = addressRisk !== 'UNKNOWN' ? addressRisk : deriveRiskLevel(score);
   const scoreColor = score !== null && score !== undefined ? contagionColor(score) : Colors.t2;
 
   return (
@@ -100,7 +130,13 @@ export default function WalletCard({ wallet, onPress, isActive = false }: Wallet
           </View>
         </View>
         <View style={styles.topRight}>
-          <Text style={styles.balance}>N/A</Text>
+          {wallet.last_tx_amount != null ? (
+            <Text style={styles.balance} numberOfLines={1}>
+              {wallet.last_tx_direction === 'outgoing' ? '-' : '+'}{formatAmount(wallet.last_tx_amount)}{wallet.last_tx_token ? ` ${wallet.last_tx_token}` : ''}
+            </Text>
+          ) : (
+            <Text style={[styles.balance, { color: Colors.t2 }]}>—</Text>
+          )}
           {wallet.last_activity && (
             <Text style={styles.activity}>{formatTimestamp(wallet.last_activity)}</Text>
           )}
@@ -110,23 +146,46 @@ export default function WalletCard({ wallet, onPress, isActive = false }: Wallet
       {/* Row 3: address */}
       <Text style={styles.address}>{wallet.address}</Text>
 
-      {/* Row 4: contagion pill */}
-      <View style={styles.cpill}>
-        <Text style={styles.cpillSpider}>{'\uD83D\uDD78'}</Text>
-        <Text style={[styles.cpillScore, { color: scoreColor }]}>
-          {score !== null && score !== undefined ? score.toFixed(1) : '—'}
-        </Text>
-        <Text style={styles.cpillLabel}>
-          CONTAGION {'\u00B7'} {score !== null && score !== undefined ? contagionLabel(score) : 'No score yet'}
-        </Text>
-        <View style={styles.cbarWrap}>
-          <View style={[
-            styles.cbar,
-            {
-              width: score !== null && score !== undefined ? `${Math.min(score * 10, 100)}%` : '0%',
-              backgroundColor: scoreColor,
-            },
-          ]} />
+      {/* Row 4: risk pills */}
+      <View style={styles.pillsWrap}>
+        {/* Address risk */}
+        <View style={styles.cpill}>
+          <Text style={styles.cpillSpider}>{'\uD83D\uDEE1'}</Text>
+          <Text style={[styles.cpillScore, { color: addressRiskColor(addressRisk) }]}>
+            {wallet.risk_score !== null && wallet.risk_score !== undefined ? wallet.risk_score : '—'}
+          </Text>
+          <Text style={styles.cpillLabel}>
+            RISK {'\u00B7'} {addressRiskLabel(addressRisk)}
+          </Text>
+          <View style={styles.cbarWrap}>
+            <View style={[
+              styles.cbar,
+              {
+                width: wallet.risk_score != null ? `${Math.min(wallet.risk_score * 10, 100)}%` : '0%',
+                backgroundColor: addressRiskColor(addressRisk),
+              },
+            ]} />
+          </View>
+        </View>
+
+        {/* Contagion */}
+        <View style={styles.cpill}>
+          <Text style={styles.cpillSpider}>{'\uD83D\uDD78'}</Text>
+          <Text style={[styles.cpillScore, { color: scoreColor }]}>
+            {score !== null && score !== undefined ? score.toFixed(1) : '—'}
+          </Text>
+          <Text style={styles.cpillLabel}>
+            CONTAGION {'\u00B7'} {score !== null && score !== undefined ? contagionLabel(score) : 'No score yet'}
+          </Text>
+          <View style={styles.cbarWrap}>
+            <View style={[
+              styles.cbar,
+              {
+                width: score !== null && score !== undefined ? `${Math.min(score * 10, 100)}%` : '0%',
+                backgroundColor: scoreColor,
+              },
+            ]} />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -217,8 +276,10 @@ const styles = StyleSheet.create({
   balance: {
     fontFamily: Fonts.spaceMono,
     fontWeight: '700',
-    fontSize: 18,
+    fontSize: 14,
     color: Colors.t1,
+    maxWidth: 120,
+    textAlign: 'right',
   },
   activity: {
     fontSize: 12,
@@ -252,7 +313,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  // Row 4 — contagion pill
+  // Row 4 — risk pills
+  pillsWrap: {
+    gap: 6,
+  },
   cpill: {
     flexDirection: 'row',
     alignItems: 'center',

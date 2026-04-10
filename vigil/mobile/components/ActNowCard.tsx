@@ -3,7 +3,8 @@
 // Matches screen-04-actnow.html mockup exactly.
 
 import React, { useRef, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, Alert as RNAlert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Alert as AlertType, ActNowAction } from '../hooks/useApi';
 import { Colors, Fonts, Radii } from '../constants/theme';
@@ -21,14 +22,37 @@ interface ActNowCardProps {
 // -- Helpers --
 
 function parseDirection(message: string): 'outgoing' | 'incoming' {
-  if (message.trim().startsWith('Sent')) return 'outgoing';
+  if (message.toUpperCase().includes('OUTGOING')) return 'outgoing';
   return 'incoming';
 }
 
 function parseAmount(message: string): string {
-  // e.g. "Sent 2,500 USDC" -> "2,500 USDC"
-  const match = message.match(/(?:Sent|Received)\s+(.+)/i);
-  return match ? match[1] : message;
+  // e.g. "🚨 OUTGOING $2500.00 USDC on solana" -> "$2,500.00 USDC"
+  const match = message.match(/\$[\d,.]+\s+\w+/);
+  return match ? match[0] : '—';
+}
+
+function parseNetwork(message: string): string | undefined {
+  const match = message.match(/\bon\s+(\S+)/i);
+  return match ? match[1] : undefined;
+}
+
+function getRiskColor(level: string): string {
+  switch (level.toUpperCase()) {
+    case 'CRITICAL': return Colors.critical;
+    case 'HIGH': return Colors.danger;
+    case 'MEDIUM': return Colors.warn;
+    default: return Colors.accent;
+  }
+}
+
+function getRiskEmoji(level: string): string {
+  switch (level.toUpperCase()) {
+    case 'CRITICAL': return '\u{1F480}';
+    case 'HIGH': return '\u{1F6A8}';
+    case 'MEDIUM': return '\u{26A0}\uFE0F';
+    default: return '\u{1F7E2}';
+  }
 }
 
 function truncateAddress(addr: string): string {
@@ -111,6 +135,13 @@ export default function ActNowCard({
   const handleActionPress = async (action: ActNowAction) => {
     if (onActionPress && onActionPress(action)) return;
 
+    // Copy tx hash for "document" action
+    if (action.id === 'document' && (action as any).tx_hash) {
+      await Clipboard.setStringAsync((action as any).tx_hash);
+      RNAlert.alert('Copied', 'Transaction hash copied to clipboard.');
+      return;
+    }
+
     const target = action.url || action.deeplink;
     if (target) {
       try {
@@ -131,14 +162,13 @@ export default function ActNowCard({
 
   if (!alert) return null;
 
-  const direction = parseDirection(alert.message);
-  const amount = parseAmount(alert.message);
-  const network = (alert as any).wallet_network || undefined;
-  const riskScore = (alert as any).risk_score ?? 8.2;
+  const direction = alert.direction || 'incoming';
+  const amount = alert.amount_usd != null ? `$${alert.amount_usd.toLocaleString()} ${alert.token_symbol || ''}`.trim() : '—';
+  const riskScore = alert.risk_score ?? 8.0;
+  const riskLevel = alert.risk_level?.toUpperCase() || 'HIGH';
+  const riskColor = getRiskColor(riskLevel);
   const sanctioned = isSanctioned(alert);
-
-  // Counterparty address from first action or fallback
-  const counterpartyAddr =
+  const counterpartyAddr = alert.counterparty ||
     alert.act_now_actions.find(a => a.counterparty)?.counterparty ||
     alert.tx_hash;
 
@@ -160,16 +190,19 @@ export default function ActNowCard({
         {/* Risk Header */}
         <View style={styles.riskHeader}>
           <View style={styles.riskIndicator}>
-            <View style={styles.riskIcon}>
-              <Text style={styles.riskIconEmoji}>{'\u{1F6A8}'}</Text>
+            <View style={[styles.riskIcon, {
+              backgroundColor: riskColor + '1F',
+              borderColor: riskColor + '40',
+            }]}>
+              <Text style={styles.riskIconEmoji}>{getRiskEmoji(riskLevel)}</Text>
             </View>
             <View style={styles.riskLabelWrap}>
-              <Text style={styles.riskLabel}>HIGH RISK</Text>
+              <Text style={[styles.riskLabel, { color: riskColor }]}>{riskLevel} RISK</Text>
               <View style={styles.riskScoreRow}>
                 <View style={styles.riskBarWrap}>
-                  <View style={[styles.riskBar, { width: `${riskScore * 10}%` }]} />
+                  <View style={[styles.riskBar, { width: `${riskScore * 10}%`, backgroundColor: riskColor }]} />
                 </View>
-                <Text style={styles.riskScoreNum}>{riskScore.toFixed(1)} / 10</Text>
+                <Text style={[styles.riskScoreNum, { color: riskColor }]}>{riskScore.toFixed(1)} / 10</Text>
               </View>
             </View>
           </View>
@@ -190,7 +223,11 @@ export default function ActNowCard({
             </View>
             <View style={styles.txRow}>
               <Text style={styles.txKey}>NETWORK</Text>
-              <Text style={styles.txVal}>{getNetworkLabel(network)}</Text>
+              <Text style={styles.txVal}>{getNetworkLabel(
+                alert.act_now_actions.find(a => (a as any).network)
+                  ? (alert.act_now_actions.find(a => (a as any).network) as any).network
+                  : (alert as any).wallet_network
+              )}</Text>
             </View>
             <View style={styles.txRow}>
               <Text style={styles.txKey}>TO</Text>
@@ -403,7 +440,7 @@ const styles = StyleSheet.create({
   actionDesc: {
     fontFamily: Fonts.interRegular,
     fontSize: 11,
-    color: Colors.t2,
+    color: Colors.t1,
     lineHeight: 22,
   },
   actionArrow: {
@@ -425,6 +462,6 @@ const styles = StyleSheet.create({
   handledBtnText: {
     fontFamily: Fonts.syneBold,
     fontSize: 13,
-    color: Colors.t2,
+    color: Colors.t1,
   },
 });

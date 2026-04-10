@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Sponsor Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080808;
+    --s1: #111111;
+    --s2: #181818;
+    --accent: #3DFFA0;
+    --accent10: rgba(61,255,160,0.10);
+    --accent20: rgba(61,255,160,0.20);
+    --warn: #F5A623;
+    --danger: #FF3B30;
+    --critical: #FF2D55;
+    --t1: #FFFFFF;
+    --t2: #888888;
+    --border: #242424;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .deck { height: 100vh; width: 100vw; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* Typography */
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 64px;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 42px;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .mono {
+    font-family: 'Space Mono', monospace;
+  }
+  .accent { color: var(--accent); }
+  .danger { color: var(--danger); }
+  .critical { color: var(--critical); }
+  .warn { color: var(--warn); }
+  .dim { color: var(--t2); }
+  .small { font-size: 14px; }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    color: var(--t2);
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+  }
+
+  .tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    color: var(--t2);
+    line-height: 1.6;
+    max-width: 700px;
+    text-align: center;
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 20px;
+  }
+  .card-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .card h3 { margin-bottom: 8px; }
+  .card p {
+    font-size: 15px;
+    color: var(--t2);
+    line-height: 1.6;
+  }
+  .card .icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  /* Stat row */
+  .stat-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .stat {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--t2);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .flow-step {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .flow-step .emoji { font-size: 24px; margin-bottom: 6px; }
+  .flow-step .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--t1);
+    letter-spacing: 1px;
+  }
+  .flow-arrow {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 20px;
+  }
+
+  /* Risk bar */
+  .risk-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-top: 12px;
+    width: 100%;
+    max-width: 700px;
+  }
+  .risk-bar .level {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    min-width: 120px;
+  }
+  .risk-bar .bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .risk-bar .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .risk-bar .score {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    background: var(--s1);
+    border-top: 1px solid var(--border);
+    z-index: 10;
+  }
+  .bottom-bar .brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  .bottom-bar .nav {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--t2);
+  }
+  .bottom-bar .powered {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--t2);
+  }
+
+  /* Accent line on top of slide */
+  .slide-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  /* Full width section label */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+  }
+
+  /* List */
+  .feature-list {
+    list-style: none;
+    margin-top: 16px;
+    max-width: 700px;
+  }
+  .feature-list li {
+    font-size: 18px;
+    color: var(--t1);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .feature-list li .bullet {
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 28px;
+  }
+
+  /* CTA */
+  .cta {
+    margin-top: 32px;
+    background: var(--accent);
+    color: #080808;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    padding: 14px 36px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide active" id="s0">
+    <div class="slide-accent"></div>
+    <p class="section-label">INTRODUCING</p>
+    <img src="vigil-logo.png" alt="Vigil" style="width:96px; height:96px; border-radius:22px; margin-bottom:20px;">
+    <h1><span class="accent">VIGIL</span></h1>
+    <p class="subtitle">STABLECOIN WALLET WATCHDOG</p>
+    <p class="tagline">
+      Real-time risk monitoring for stablecoin wallets.<br>
+      Powered by <span class="accent">Range</span> blockchain intelligence.
+    </p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-val">6</div>
+        <div class="stat-label">NETWORKS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">24/7</div>
+        <div class="stat-label">MONITORING</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">&lt;3s</div>
+        <div class="stat-label">RISK CHECK</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Problem -->
+  <div class="slide" id="s1">
+    <div class="slide-accent"></div>
+    <p class="section-label">THE PROBLEM</p>
+    <h2>Stablecoin users are blind<br>to counterparty risk</h2>
+    <p class="tagline" style="margin-top:16px;">
+      You're about to send $10,000 USDC. Is the recipient sanctioned? Linked to mixers? Flagged by OFAC?
+      <br><br>
+      <span class="dim">Range protects institutions. <span class="accent">Vigil protects you.</span></span>
+    </p>
+  </div>
+
+  <!-- SLIDE 3: How it works -->
+  <div class="slide" id="s2">
+    <div class="slide-accent"></div>
+    <p class="section-label">HOW IT WORKS</p>
+    <h2>Three layers of protection</h2>
+    <div class="card-grid three">
+      <div class="card">
+        <div class="icon">&#x1F6E1;&#xFE0F;</div>
+        <h3 class="accent">Watch</h3>
+        <p>Add any wallet address. Vigil monitors every stablecoin transaction in real time across 6 networks.</p>
+      </div>
+      <div class="card">
+        <div class="icon">&#x1F6A8;</div>
+        <h3 class="warn">Alert</h3>
+        <p>High-risk transactions trigger instant alerts with risk scores, OFAC status, and recommended actions.</p>
+      </div>
+      <div class="card">
+        <div class="icon">&#x2705;</div>
+        <h3 style="color:var(--t1);">SafeSend</h3>
+        <p>Verify any address before sending. Get risk score, sanctions check, and contagion analysis in seconds.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Range Integration -->
+  <div class="slide" id="s3">
+    <div class="slide-accent"></div>
+    <p class="section-label">POWERED BY RANGE</p>
+    <h2>Real blockchain intelligence</h2>
+    <p class="tagline" style="margin-bottom: 24px;">
+      Every risk score, every sanctions check, every contagion analysis<br>comes live from Range's MCP API.
+    </p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="emoji">&#x1F4F1;</div>
+        <div class="label">VIGIL APP</div>
+      </div>
+      <div class="flow-arrow">&#x2192;</div>
+      <div class="flow-step">
+        <div class="emoji">&#x2699;&#xFE0F;</div>
+        <div class="label">VIGIL API</div>
+      </div>
+      <div class="flow-arrow">&#x2192;</div>
+      <div class="flow-step" style="border-color: var(--accent); background: rgba(61,255,160,0.05);">
+        <div class="emoji">&#x1F310;</div>
+        <div class="label" style="color:var(--accent);">RANGE MCP</div>
+      </div>
+      <div class="flow-arrow">&#x2192;</div>
+      <div class="flow-step">
+        <div class="emoji">&#x26D3;&#xFE0F;</div>
+        <div class="label">BLOCKCHAIN</div>
+      </div>
+    </div>
+    <ul class="feature-list" style="margin-top: 28px;">
+      <li><span class="bullet mono">01</span> <span class="mono small">get_address_risk</span> <span class="dim">&mdash; Address risk scoring</span></li>
+      <li><span class="bullet mono">02</span> <span class="mono small">check_sanctions</span> <span class="dim">&mdash; OFAC / token blacklist</span></li>
+      <li><span class="bullet mono">03</span> <span class="mono small">get_address_connections</span> <span class="dim">&mdash; Contagion graph</span></li>
+      <li><span class="bullet mono">04</span> <span class="mono small">get_payment_risk</span> <span class="dim">&mdash; Pre-send risk check</span></li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 5: Risk Levels -->
+  <div class="slide" id="s4">
+    <div class="slide-accent"></div>
+    <p class="section-label">RISK INTELLIGENCE</p>
+    <h2>Every wallet scored in real time</h2>
+    <p class="tagline" style="margin-bottom: 20px;">
+      Range scores every address and counterparty on a 0&ndash;10 scale.
+    </p>
+
+    <div class="risk-bar">
+      <span class="level accent">LOW</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:15%;background:var(--accent);"></div></div>
+      <span class="score accent">1.5</span>
+    </div>
+    <div class="risk-bar">
+      <span class="level warn">MEDIUM</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:54%;background:var(--warn);"></div></div>
+      <span class="score warn">5.4</span>
+    </div>
+    <div class="risk-bar">
+      <span class="level danger">HIGH</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:82%;background:var(--danger);"></div></div>
+      <span class="score danger">8.2</span>
+    </div>
+    <div class="risk-bar">
+      <span class="level critical">CRITICAL</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:100%;background:var(--critical);"></div></div>
+      <span class="score critical">10.0</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Live Demo -->
+  <div class="slide" id="s5">
+    <div class="slide-accent"></div>
+    <p class="section-label">LIVE DEMO</p>
+    <h1 style="font-size:52px;">Let me show you<br><span class="accent">Vigil in action</span></h1>
+    <p class="tagline" style="margin-top:20px;">
+      Watch wallets &rarr; Real-time alerts &rarr; SafeSend risk check &rarr; Contagion graph
+    </p>
+    <div class="card-grid" style="margin-top:32px; max-width:600px;">
+      <div class="card" style="text-align:center;">
+        <div class="icon">&#x1F4F1;</div>
+        <h3>Mobile App</h3>
+        <p>iOS / Android</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon">&#x1F4E8;</div>
+        <h3>Postman</h3>
+        <p>Fire alerts live</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Close -->
+  <div class="slide" id="s6">
+    <div class="slide-accent"></div>
+    <p class="section-label">BUILT WITH RANGE</p>
+    <img src="vigil-logo.png" alt="Vigil" style="width:80px; height:80px; border-radius:18px; margin-bottom:16px;">
+    <h1><span class="accent">VIGIL</span></h1>
+    <p class="subtitle">STABLECOIN WALLET WATCHDOG</p>
+    <p class="tagline">
+      Range protects institutions.<br>
+      <span class="accent" style="font-weight:600;">Vigil protects everyone.</span>
+    </p>
+    <div class="card-grid three" style="margin-top:32px; max-width:700px;">
+      <div class="card" style="text-align:center;">
+        <p class="mono accent" style="font-weight:700; font-size:13px;">6 CHAINS</p>
+        <p class="dim small" style="margin-top:4px;">ETH SOL TRX ATOM OSMO XLM</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <p class="mono accent" style="font-weight:700; font-size:13px;">REAL-TIME</p>
+        <p class="dim small" style="margin-top:4px;">Polling + instant alerts</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <p class="mono accent" style="font-weight:700; font-size:13px;">100% RANGE</p>
+        <p class="dim small" style="margin-top:4px;">All intelligence from MCP</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation bar -->
+<div class="bottom-bar">
+  <span class="brand">VIGIL</span>
+  <span class="nav" id="slideCounter">1 / 7</span>
+  <span class="powered">Powered by Range</span>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    document.getElementById('slideCounter').textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); go(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); go(current - 1); }
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(slides.length - 1);
+  });
+
+  // Touch / click navigation
+  document.addEventListener('click', (e) => {
+    if (e.clientX > window.innerWidth / 2) go(current + 1);
+    else go(current - 1);
+  });
+</script>
+
+</body>
+</html>

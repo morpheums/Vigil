@@ -17,7 +17,7 @@ console.log('Seeding Vigil database with demo wallets...');
 let added = 0;
 for (const w of DEMO_WALLETS) {
   try {
-    db.insertWallet(w.address, w.network, w.label, null, null);
+    db.insertWallet(w.address, w.network, w.label, null, 'jrmejiasoft@gmail.com');
     console.log(`  + ${w.label} (${w.network})`);
     added++;
   } catch (err) {

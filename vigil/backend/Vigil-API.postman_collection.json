@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "Vigil API",
+    "description": "Vigil stablecoin wallet watchdog — backend API collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallets",
+      "item": [
+        {
+          "name": "GET /wallets",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/wallets", "host": ["{{baseUrl}}"], "path": ["wallets"] }
+          }
+        },
+        {
+          "name": "POST /wallets — Add Wallet",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/wallets", "host": ["{{baseUrl}}"], "path": ["wallets"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"0x742d35Cc6634C0532925a3b844Bc9e7595f2bD3e\",\n  \"network\": \"ethereum\",\n  \"label\": \"My Test Wallet\",\n  \"alertEmail\": \"you@email.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /wallets/:id",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/wallets/{{walletId}}", "host": ["{{baseUrl}}"], "path": ["wallets", "{{walletId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contagion",
+      "item": [
+        {
+          "name": "GET /wallets/:id/contagion",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/wallets/1/contagion", "host": ["{{baseUrl}}"], "path": ["wallets", "1", "contagion"] }
+          }
+        },
+        {
+          "name": "POST /wallets/:id/contagion/refresh",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/wallets/1/contagion/refresh", "host": ["{{baseUrl}}"], "path": ["wallets", "1", "contagion", "refresh"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "GET /alerts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/alerts?limit=50", "host": ["{{baseUrl}}"], "path": ["alerts"], "query": [{ "key": "limit", "value": "50" }] }
+          }
+        },
+        {
+          "name": "GET /alerts — by wallet",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/alerts?walletId=1&limit=10", "host": ["{{baseUrl}}"], "path": ["alerts"], "query": [{ "key": "walletId", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "PATCH /alerts/:id/acknowledge",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/alerts/1/acknowledge", "host": ["{{baseUrl}}"], "path": ["alerts", "1", "acknowledge"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SafeSend / Risk",
+      "item": [
+        {
+          "name": "POST /risk-check",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/risk-check", "host": ["{{baseUrl}}"], "path": ["risk-check"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"0x08723392ed15743cc38513c4925f5e6be5c17243\",\n  \"network\": \"ethereum\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /payment-risk",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/payment-risk", "host": ["{{baseUrl}}"], "path": ["payment-risk"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senderAddress\": \"0x742d35Cc6634C0532925a3b844Bc9e7595f2bD3e\",\n  \"senderNetwork\": \"ethereum\",\n  \"recipientAddress\": \"0x08723392ed15743cc38513c4925f5e6be5c17243\",\n  \"recipientNetwork\": \"ethereum\",\n  \"amountUsd\": 5000\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Debug / Demo",
+      "item": [
+        {
+          "name": "Fire Alert — HIGH",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/debug/fire-alert", "host": ["{{baseUrl}}"], "path": ["debug", "fire-alert"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletId\": 1,\n  \"scenario\": \"high\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fire Alert — CRITICAL (Lazarus)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/debug/fire-alert", "host": ["{{baseUrl}}"], "path": ["debug", "fire-alert"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletId\": 1,\n  \"scenario\": \"critical\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fire Alert — SANCTIONED (Tornado Cash)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/debug/fire-alert", "host": ["{{baseUrl}}"], "path": ["debug", "fire-alert"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletId\": 1,\n  \"scenario\": \"sanctioned\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fire Alert — CLEAN incoming",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/debug/fire-alert", "host": ["{{baseUrl}}"], "path": ["debug", "fire-alert"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletId\": 3,\n  \"scenario\": \"incoming_clean\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fire Alert — MEDIUM (contagion)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/debug/fire-alert", "host": ["{{baseUrl}}"], "path": ["debug", "fire-alert"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletId\": 1,\n  \"scenario\": \"contagion\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

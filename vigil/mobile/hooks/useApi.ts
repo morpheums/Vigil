@@ -29,7 +29,12 @@ export interface Wallet {
   label: string | null;
   contagion_score: number | null;
   contagion_updated_at: string | null;
+  risk_level: string | null;
+  risk_score: number | null;
   last_activity: string | null;
+  last_tx_amount: number | null;
+  last_tx_token: string | null;
+  last_tx_direction: string | null;
   created_at: string;
 }
 
@@ -64,6 +69,11 @@ export interface Alert {
   tx_hash: string;
   message: string;
   risk_level: string;
+  risk_score: number | null;
+  direction: 'incoming' | 'outgoing' | null;
+  amount_usd: number | null;
+  token_symbol: string | null;
+  counterparty: string | null;
   act_now_actions: ActNowAction[];
   channels: string[];
   acknowledged: number;
@@ -182,6 +192,17 @@ export function useApi() {
     }
   }
 
+  // ── Transactions ─────────────────────────────────────────────────────────
+
+  async function getTransactions(walletId: number, limit = 5): Promise<Transaction[]> {
+    try {
+      const { data } = await client.get(`/wallets/${walletId}/transactions`, { params: { limit } });
+      return data;
+    } catch (err) {
+      throw apiError(err);
+    }
+  }
+
   // ── Alerts ─────────────────────────────────────────────────────────────────
 
   async function getAlerts(params?: {
@@ -263,6 +284,7 @@ export function useApi() {
     deleteWallet,
     getContagion,
     refreshContagion,
+    getTransactions,
     getAlerts,
     acknowledgeAlert,
     checkRisk,
